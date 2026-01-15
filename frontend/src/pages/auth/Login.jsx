@@ -7,6 +7,7 @@ function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Lógica de redirección compartida
   const redirectBasedOnRole = (currentUser) => {
@@ -52,14 +53,34 @@ function Login() {
             style={{ padding: '12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 15 }}
           />
           <label style={{ color: '#374151', fontWeight: 500 }}>Contraseña</label>
-          <input
-            type="password"
-            placeholder="Tu contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ padding: '12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 15 }}
-          />
+          <div style={{ position: 'relative' }}>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Tu contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              style={{ padding: '12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 15, width: '100%' }}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              style={{
+                position: 'absolute',
+                right: 10,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'none',
+                border: 'none',
+                color: '#10B981',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: 14
+              }}
+            >
+              {showPassword ? 'Ocultar' : 'Mostrar'}
+            </button>
+          </div>
           <button type="submit" style={{ padding: '12px', background: '#10B981', color: 'white', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 16, marginTop: 8 }}>
             Ingresar
           </button>
