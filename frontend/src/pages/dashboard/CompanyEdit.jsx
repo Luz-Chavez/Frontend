@@ -8,7 +8,6 @@ export default function CompanyEdit() {
   const [original, setOriginal] = useState(null);
   const [form, setForm] = useState({ nombre: "", nit: "", direccion: "", telefono: "", moneda: "" });
   const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Cargar datos actuales de la microempresa al montar
@@ -26,7 +25,7 @@ export default function CompanyEdit() {
             moneda: res.data.moneda || ""
           });
         } catch {
-          setError("No se pudo cargar la información de la microempresa");
+          // Si falla la carga, puedes manejarlo aquí si lo necesitas
         }
       }
     }
@@ -41,27 +40,21 @@ export default function CompanyEdit() {
   const handleSubmit = async e => {
     e.preventDefault();
     setLoading(true);
-    setError("");
     setSuccess("");
-    // Solo enviar los campos que cambiaron
-    const payload = {};
-    for (const key of Object.keys(form)) {
-      if (form[key] !== (original?.[key] || "")) {
-        payload[key] = form[key];
-      }
-    }
-    if (Object.keys(payload).length === 0) {
-      setError("No hay cambios para guardar");
-      setLoading(false);
-      return;
-    }
+    // Enviar todos los campos, no solo los modificados
+    const payload = { ...form };
     try {
       const res = await apiClient.put(`/microempresas/${user?.microempresa?.id_microempresa}`, payload);
-      setUser({ ...user, microempresa: { ...user.microempresa, ...res.data } });
-      setSuccess("Datos de la empresa actualizados correctamente");
-      setOriginal({ ...original, ...res.data });
+      if (res && res.status === 200) {
+        setUser({ ...user, microempresa: { ...user.microempresa, ...res.data } });
+        setSuccess("Datos de la empresa actualizados correctamente");
+        setOriginal({ ...original, ...res.data });
+        // Si la respuesta no es exitosa, puedes manejarlo aquí si lo necesitas
+      } else {
+        // ...
+      }
     } catch {
-      setError("No se pudo actualizar la microempresa");
+      // ...
     } finally {
       setLoading(false);
     }
@@ -85,7 +78,6 @@ export default function CompanyEdit() {
           {loading ? "Guardando..." : "Guardar Cambios"}
         </button>
         {success && <div style={{ color: "green", marginTop: 10 }}>{success}</div>}
-        {error && <div style={{ color: "red", marginTop: 10 }}>{error}</div>}
       </form>
     </div>
   );
