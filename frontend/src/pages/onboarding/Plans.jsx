@@ -1,18 +1,30 @@
 import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { getPlanesRequest } from "../../api/user.api";
 
 const Plans = () => {
   const navigate = useNavigate();
+  const [planes, setPlanes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const plans = [
-    { id: 1, name: "Básico", price: "29", features: ["3 Usuarios", "Inventario básico", "Soporte por correo"], color: "#6B7280" },
-    { id: 2, name: "Profesional", price: "59", features: ["10 Usuarios", "Inventario ilimitado", "Reportes avanzados", "Soporte prioritario"], color: "#059669", recommended: true },
-    { id: 3, name: "Empresarial", price: "99", features: ["Usuarios ilimitados", "API Access", "Gestor de cuenta dedicado"], color: "#111827" },
-  ];
+  useEffect(() => {
+    async function fetchPlanes() {
+      try {
+        const res = await getPlanesRequest();
+        setPlanes(res.data);
+      } catch {
+        setError("Error al cargar los planes");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPlanes();
+  }, []);
 
-  const handleSelect = (planId) => {
-    // Aquí guardaríamos el plan en el estado o localstorage
-    navigate("/onboarding/payment");
+  const handleSelect = (plan) => {
+    navigate("/onboarding/payment", { state: { plan } });
   };
 
   const s = {
@@ -36,28 +48,22 @@ const Plans = () => {
     <div style={s.container}>
       <h1 style={s.title}>Elige el plan perfecto para tu negocio</h1>
       <p style={s.subtitle}>Comienza gratis y escala según tus necesidades</p>
-
+      {loading && <div>Cargando planes...</div>}
+      {error && <div style={{color:'red'}}>{error}</div>}
       <div style={s.grid}>
-        {plans.map((p) => (
-          <div key={p.id} style={{ ...s.card, borderColor: p.recommended ? '#059669' : '#E5E7EB' }}>
+        {planes.map((p) => (
+          <div key={p.id_plan} style={{ ...s.card, borderColor: p.recommended ? '#059669' : '#E5E7EB' }}>
             {p.recommended && <div style={s.recommendedBadge}>Más Popular</div>}
-            
-            <h3 style={s.planName}>{p.name}</h3>
-            <div style={s.price}>${p.price}<span style={{fontSize:'16px', color:'#6B7280', fontWeight:'400'}}>/mes</span></div>
-            
+            <h3 style={s.planName}>{p.nombre}</h3>
+            <div style={s.price}>${p.precio}<span style={{fontSize:'16px', color:'#6B7280', fontWeight:'400'}}>/mes</span></div>
             <div style={s.features}>
-              {p.features.map((f, i) => (
-                <div key={i} style={s.featureItem}>
-                  <Check size={16} color="#059669" /> {f}
-                </div>
-              ))}
+              {p.descripcion && <div style={s.featureItem}>{p.descripcion}</div>}
             </div>
-
             <button 
-              onClick={() => handleSelect(p.id)}
+              onClick={() => handleSelect(p)}
               style={{ ...s.button, backgroundColor: p.recommended ? '#059669' : '#1F2937', color: 'white' }}
             >
-              Elegir {p.name}
+              Elegir {p.nombre}
             </button>
           </div>
         ))}

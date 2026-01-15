@@ -1,5 +1,13 @@
+import UserProfile from "../pages/user/UserProfile";
+import CreateMicroempresaOnboarding from "../pages/onboarding/CreateMicroempresaOnboarding";
+import AdminMicroempresaProfile from "../pages/dashboard/AdminMicroempresaProfile";
+import UserPlanDetail from "../pages/user/UserPlanDetail";
+               {/* 🟣 FLUJO USER SIMPLE */}
+               <Route element={<RoleGuard allowedRoles={['user']} />}>
+                  <Route path="/user/profile" element={<UserProfile />} />
+               </Route>
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "../context/AuthContext";
+import AuthProvider from "../context/AuthContext.jsx";
 import RoleGuard from "../guards/RoleGuard";
 
 // Layouts
@@ -8,6 +16,8 @@ import DashboardLayout from "../layouts/DashboardLayout";
 // Páginas de Autenticación
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
+import Recovery from "../pages/auth/Recovery";
+import ResetPassword from "../pages/auth/ResetPassword";
 
 // Páginas del Dashboard Admin (Flujo B)
 import DashboardHome from "../pages/dashboard/Home";      
@@ -20,6 +30,10 @@ import SuperDashboard from "../pages/superadmin/Dashboard";
 import Companies from "../pages/superadmin/Companies";
 import PlansManager from "../pages/superadmin/PlansManager";
 import Admins from "../pages/superadmin/Admins";
+import Profile from "../pages/dashboard/Profile";
+import AdminsDashboard from "../pages/dashboard/Admins";
+import Vendedores from "../pages/dashboard/Vendedores";
+import CompanyEdit from "../pages/dashboard/CompanyEdit";
 
 // Páginas Onboarding (Flujo A)
 import OnboardingProfile from "../pages/onboarding/UserProfile"; 
@@ -38,14 +52,16 @@ function AppRouter() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/recovery" element={<Recovery />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/unauthorized" element={<h1>No tienes permiso</h1>} />
 
-          {/* 🟡 FLUJO A: Admin SIN Microempresa (Onboarding) */}
-          <Route element={<RoleGuard allowedRoles={['admin_microempresa']} requireCompany={false} />}>
-             {/* Sin DashboardLayout para enfocar en el pago */}
+          {/* 🟡 FLUJO A: Onboarding SOLO para usuario */}
+          <Route element={<RoleGuard allowedRoles={['usuario']} requireCompany={false} />}>
              <Route path="/onboarding/profile" element={<OnboardingProfile />} />
              <Route path="/onboarding/plans" element={<Plans />} />
              <Route path="/onboarding/payment" element={<Payment />} />
+             <Route path="/onboarding/create-microempresa" element={<CreateMicroempresaOnboarding />} />
           </Route>
 
           {/* 🔵 FLUJO C: Vendedor */}
@@ -57,12 +73,15 @@ function AppRouter() {
           </Route>
 
           {/* 🟢 FLUJO B: Admin CON Microempresa */}
-          <Route element={<RoleGuard allowedRoles={['admin_microempresa']} requireCompany={true} />}>
+          <Route element={<RoleGuard allowedRoles={['adminmicroempresa']} requireCompany={true} />}>
              <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<DashboardHome />} />
                 <Route path="/dashboard/users" element={<Users />} />
                 <Route path="/dashboard/subscription" element={<Subscription />} />
-                <Route path="/dashboard/profile" element={<CompanyProfile />} /> {/* ✅ Ruta Agregada */}
+                <Route path="/dashboard/profile" element={<Profile />} />
+                <Route path="/dashboard/company-edit" element={<CompanyEdit />} />
+                <Route path="/dashboard/admins" element={<AdminsDashboard />} />
+                <Route path="/dashboard/vendedores" element={<Vendedores />} />
              </Route>
           </Route>
 
@@ -76,7 +95,12 @@ function AppRouter() {
              </Route>
           </Route>
 
-        </Routes>
+               {/* 🟣 FLUJO USUARIO SIMPLE */}
+               <Route element={<RoleGuard allowedRoles={['usuario']} />}>
+                  <Route path="/user/profile" element={<UserProfile />} />
+                  <Route path="/user/plan/:id_plan" element={<UserPlanDetail />} />
+               </Route>
+            </Routes>
       </BrowserRouter>
     </AuthProvider>
   );

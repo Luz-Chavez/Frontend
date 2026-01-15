@@ -43,7 +43,7 @@ function UserProfile() {
           <div style={s.infoLabel}>Tu Usuario</div>
           <div style={s.infoValue}><User size={18} color="#9CA3AF"/> {user.email}</div>
           
-          <div style={s.infoLabel} style={{marginTop: '15px'}}>Estado de la cuenta</div>
+          <div style={{...s.infoLabel, marginTop: '15px'}}>Estado de la cuenta</div>
           <div style={s.infoValue}>
              <span style={{backgroundColor:'#FEF3C7', color:'#92400E', padding:'2px 8px', borderRadius:'6px', fontSize:'13px'}}>
                 Sin Microempresa

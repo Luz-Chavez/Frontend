@@ -25,19 +25,21 @@ const Sidebar = () => {
       { icon: CreditCard, text: "Planes", path: "/superadmin/plans" },
       { icon: ShieldCheck, text: "SuperAdmins", path: "/superadmin/admins" },
     ],
-    admin_microempresa: [
+    adminmicroempresa: [
       { icon: LayoutDashboard, text: "Dashboard", path: "/dashboard" },
-      { icon: Users, text: "Usuarios", path: "/dashboard/users" },
+      { icon: User, text: "Mi Perfil", path: "/dashboard/profile" },
+      { icon: Building2, text: "Editar Empresa", path: "/dashboard/company-edit" },
+      { icon: ShieldCheck, text: "Admins de la Empresa", path: "/dashboard/admins" },
+      { icon: Users, text: "Vendedores", path: "/dashboard/vendedores" },
       { icon: CreditCard, text: "Suscripción", path: "/dashboard/subscription" },
-      { icon: User, text: "Perfil", path: "/dashboard/profile" },
     ],
     vendedor: [
       { icon: User, text: "Mi Perfil", path: "/seller/profile" },
     ]
   };
 
-  // Protección contra error si user.role no coincide
-  const currentMenu = user && menus[user.role] ? menus[user.role] : [];
+  // Protección contra error si user.rol no coincide
+  const currentMenu = user && menus[user.rol] ? menus[user.rol] : [];
 
   return (
     <div style={styles.sidebar}>

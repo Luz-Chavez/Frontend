@@ -1,4 +1,8 @@
-import { Users, UserCheck, Box, CreditCard } from "lucide-react";
+import { Users, UserCheck, Box, CreditCard, Building2 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { useEffect, useState } from "react";
+import apiClient from "../../services/apiClient";
+import PlanInfo from "../../components/PlanInfo";
 
 const Home = () => {
   // Estilos "inline" simulando Tailwind
@@ -22,44 +26,97 @@ const Home = () => {
     badge: { display: 'inline-block', padding: '4px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: '600', backgroundColor: '#D1FAE5', color: '#065F46' }
   };
 
+  const { user } = useAuth();
+  const [plan, setPlan] = useState(null);
+  const [empresa, setEmpresa] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchData() {
+      if (user?.rol === 'adminmicroempresa' && user?.microempresa?.id_microempresa) {
+        try {
+          // Obtener datos de la microempresa actualizados
+          const empresaRes = await apiClient.get(`/microempresas/${user.microempresa.id_microempresa}`);
+          setEmpresa(empresaRes.data);
+        } catch {
+          setError("No se pudo cargar la información de la microempresa");
+        }
+        try {
+          // Obtener plan actual
+          const planRes = await apiClient.get(`/suscripciones/microempresa/${user.microempresa.id_microempresa}/plan`);
+          setPlan(planRes.data);
+        } catch {
+          setError("No se pudo cargar el plan actual");
+        }
+        setLoading(false);
+      } else {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [user]);
+
+  if (user?.rol === 'adminmicroempresa') {
+    return (
+      <div>
+        <div style={s.header}>
+          <h1 style={s.title}>Dashboard</h1>
+          <p style={s.subtitle}>Vista general de tu microempresa</p>
+        </div>
+        {error && <div style={{color:'red'}}>{error}</div>}
+        <div style={s.section}>
+          <div style={s.sectionTitle}>
+            <Building2 size={20} /> Información de la microempresa
+          </div>
+          <div style={s.infoGrid}>
+            <div>
+              <span style={s.label}>Nombre</span>
+              <div style={s.value}>{empresa?.nombre || '-'}</div>
+            </div>
+            <div>
+              <span style={s.label}>NIT</span>
+              <div style={s.value}>{empresa?.nit || '-'}</div>
+            </div>
+            <div>
+              <span style={s.label}>Dirección</span>
+              <div style={s.value}>{empresa?.direccion || '-'}</div>
+            </div>
+            <div>
+              <span style={s.label}>Teléfono</span>
+              <div style={s.value}>{empresa?.telefono || '-'}</div>
+            </div>
+            <div>
+              <span style={s.label}>Moneda</span>
+              <div style={s.value}>{empresa?.moneda || '-'}</div>
+            </div>
+            <div>
+              <span style={s.label}>Estado</span>
+              <span style={s.badge}>{empresa?.estado ? 'Activo' : 'Inactivo'}</span>
+            </div>
+            <div>
+              <span style={s.label}>Fecha de registro</span>
+              <div style={s.value}>{empresa?.fecha_registro ? new Date(empresa.fecha_registro).toLocaleString() : '-'}</div>
+            </div>
+            {/* Se eliminó la visualización del plan actual aquí, ya que existe una vista dedicada para ello */}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  // Otros roles: vista por defecto
   return (
     <div>
       <div style={s.header}>
         <h1 style={s.title}>Dashboard</h1>
         <p style={s.subtitle}>Vista general de tu microempresa</p>
       </div>
-
       {/* Cards Superiores */}
       <div style={s.grid}>
         <Card title="Total Usuarios" value="3" icon={Users} desc="Todos los roles" styles={s} />
         <Card title="Usuarios Activos" value="2" icon={UserCheck} desc="Acceso permitido" styles={s} />
         <Card title="Límite de Usuarios" value="10" icon={Box} desc="Según tu plan" styles={s} />
         <Card title="Plan Actual" value="Profesional" icon={CreditCard} desc="Facturación mensual" styles={s} />
-      </div>
-
-      {/* Información de la empresa */}
-      <div style={s.section}>
-        <div style={s.sectionTitle}>
-          <Building2 size={20} /> Información de la microempresa
-        </div>
-        <div style={s.infoGrid}>
-          <div>
-            <span style={s.label}>Nombre</span>
-            <div style={s.value}>Tienda La Esquina</div>
-          </div>
-          <div>
-            <span style={s.label}>NIT / Razón Social</span>
-            <div style={s.value}>123456789-0</div>
-          </div>
-          <div>
-            <span style={s.label}>Estado</span>
-            <span style={s.badge}>Activo</span>
-          </div>
-          <div>
-            <span style={s.label}>Plan</span>
-            <div style={s.value}>Plan Profesional</div>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -78,5 +135,4 @@ const Card = ({ title, value, icon: Icon, desc, styles }) => (
   </div>
 );
 
-import { Building2 } from "lucide-react"; // Importar el icono que faltaba
 export default Home;

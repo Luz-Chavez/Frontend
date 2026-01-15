@@ -1,22 +1,23 @@
 import { CreditCard, Lock, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 
 const Payment = () => {
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const plan = state?.plan;
 
   const handlePayment = (e) => {
     e.preventDefault();
     // Simulamos proceso de pago exitoso
     Swal.fire({
       title: '¡Pago Exitoso!',
-      text: 'Tu microempresa ha sido activada.',
+      text: 'Ahora crea tu microempresa.',
       icon: 'success',
       confirmButtonColor: '#059669'
     }).then(() => {
-        // En una app real, aquí recargarías el usuario del contexto
-        // Para la demo, lo mandamos al dashboard (suponiendo que el backend ya actualizó el estado)
-        navigate("/dashboard"); 
+        // Redirigir a la vista de creación de microempresa, pasando el plan
+        navigate("/onboarding/create-microempresa", { state: { plan } });
     });
   };
 
@@ -49,9 +50,9 @@ const Payment = () => {
         </div>
 
         <div style={s.summary}>
-            <div style={s.row}><span>Plan Profesional</span><span>$59.00</span></div>
+            <div style={s.row}><span>{plan?.nombre || 'Plan'}</span><span>${plan?.precio || '0.00'}</span></div>
             <div style={s.row}><span>Impuestos (0%)</span><span>$0.00</span></div>
-            <div style={s.total}><span>Total a pagar</span><span>$59.00 / mes</span></div>
+            <div style={s.total}><span>Total a pagar</span><span>${plan?.precio || '0.00'} / mes</span></div>
         </div>
 
         <form onSubmit={handlePayment} style={s.form}>

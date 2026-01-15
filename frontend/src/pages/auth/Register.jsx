@@ -1,17 +1,24 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserPlus } from "lucide-react";
 
 function Register() {
   const { signup, errors } = useAuth();
-  const [username, setUsername] = useState("");
+  const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await signup({ username, email, password });
+    const result = await signup({ nombre, email, password });
+    // Redirigir solo si el registro fue exitoso (sin errores)
+    setTimeout(() => {
+      if (errors.length === 0 && result !== false) {
+        navigate("/login");
+      }
+    }, 100);
   };
 
   const s = {
@@ -36,8 +43,8 @@ function Register() {
         ))}
 
         <form onSubmit={handleSubmit}>
-          <input type="text" placeholder="Nombre de usuario" style={s.input} 
-                 onChange={(e) => setUsername(e.target.value)} required />
+             <input type="text" placeholder="Nombre completo" style={s.input} 
+               onChange={(e) => setNombre(e.target.value)} required />
                  
           <input type="email" placeholder="Correo electrónico" style={s.input} 
                  onChange={(e) => setEmail(e.target.value)} required />

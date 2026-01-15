@@ -1,48 +1,14 @@
-import { createContext, useState, useContext, useEffect } from "react";
-import { registerRequest, loginRequest, verifyTokenRequest } from "../api/auth.api";
+import { useState, useEffect } from "react";
+import { registerRequest, loginRequest } from "../api/auth.api";
+import { getMeRequest } from "../api/user.api";
+import { AuthContext } from "./AuthContext";
 
-// 1. Crear el contexto
-export const AuthContext = createContext();
-
-// 2. Hook personalizado
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth debe usarse dentro de un AuthProvider");
-  }
-  return context;
-};
-
-// 3. Provider
-export const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // --- MOCK: SIMULACIÓN DE LOGIN (Para pruebas sin Backend) ---
-  const mockLogin = (email) => {
-    let role = 'admin_microempresa';
-    let has_microempresa = true;
-
-    // Reglas "Mágicas" para probar flujos
-    if (email.includes('superadmin')) {
-      role = 'superadmin';
-    } else if (email.includes('vendedor')) {
-      role = 'vendedor';
-    } else if (email.includes('sinempresa')) {
-      has_microempresa = false;
-    }
-
-    return {
-      _id: '12345',
-      username: 'Usuario Test',
-      email: email,
-      role: role,
-      has_microempresa: has_microempresa
-    };
-  };
-  // -------------------------------------------------------------
 
   const signup = async (user) => {
     try {
@@ -56,20 +22,41 @@ export const AuthProvider = ({ children }) => {
 
   const signin = async (userCredentials) => {
     try {
-      // ⚠️ MODO PRUEBA: Usamos mockLogin en vez de la API real
-      // const res = await loginRequest(userCredentials);
-      
-      console.log("Simulando login para:", userCredentials.email);
-      const mockUser = mockLogin(userCredentials.email);
-
-      setUser(mockUser);
+      // POST /login espera { email, password }
+      const loginRes = await loginRequest({
+        email: userCredentials.email,
+        password: userCredentials.password
+      });
+      const { access_token, token_type } = loginRes.data;
+      // Guardar token en localStorage
+      localStorage.setItem('access_token', access_token);
+      // Configurar el header Authorization para futuras peticiones (sincrónico antes de /me)
+      const apiClient = (await import('../services/apiClient')).default;
+      apiClient.defaults.headers.common['Authorization'] = `${token_type} ${access_token}`;
+      // Obtener datos del usuario autenticado
+      const meRes = await getMeRequest();
+      let userData = meRes.data;
+      // Si es adminmicroempresa, consultar si tiene microempresa asociada
+      if (userData.rol === 'adminmicroempresa') {
+        try {
+          const admRes = await apiClient.get(`/admins/${userData.id_usuario}`);
+          // Si la respuesta es 200 y tiene microempresa, agregar has_microempresa=true
+          if (admRes.data && admRes.data.id_microempresa) {
+            userData = { ...userData, has_microempresa: true, microempresa: admRes.data };
+          } else {
+            userData = { ...userData, has_microempresa: false };
+          }
+        } catch {
+          userData = { ...userData, has_microempresa: false };
+        }
+      }
+      setUser(userData);
       setIsAuthenticated(true);
-      
-      // Retornamos el usuario para que el Login sepa a dónde redirigir
-      return mockUser; 
-
+      return userData;
     } catch (error) {
-        setErrors(["Error al iniciar sesión"]);
+      const errMsg = error.response?.data?.detail || error.response?.data || ["Error al iniciar sesión"];
+      setErrors(Array.isArray(errMsg) ? errMsg : [errMsg]);
+      return false;
     }
   };
 
@@ -111,3 +98,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+export default AuthProvider;
