@@ -32,8 +32,8 @@ export default function AllClientes() {
       setError("");
       let url = "/clientes";
       if (filtro === "activos") url = "/clientes/activos";
-      if (filtro === "inactivos") url = "/clientes/inactivos";
-      if (empresaSel) url = `/clientes/microempresa/${empresaSel}`;
+      else if (filtro === "inactivos") url = "/clientes/inactivos";
+      else if (empresaSel) url = `/clientes/microempresa/${empresaSel}`;
       try {
         const res = await apiClient.get(url);
         setClientes(res.data);
