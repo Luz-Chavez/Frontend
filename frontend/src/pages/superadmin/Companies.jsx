@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
-import { Eye, Power, X, Filter } from "lucide-react";
+import { Eye, Power, X, Filter, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   getMicroempresas,
   getMicroempresaById,
@@ -106,6 +107,7 @@ const s = {
 };
 
 const Companies = () => {
+  const navigate = useNavigate();
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState({ open: false, data: null, plan: null });
@@ -299,6 +301,9 @@ const Companies = () => {
                       <button style={s.btnView} onClick={() => handleShowDetails(c)} disabled={actionLoading}><Eye size={14}/> Ver</button>
                       <button style={s.btnAction} onClick={() => handleToggleEstado(c)} disabled={actionLoading}>
                         <Power size={14}/> {c.estado ? 'Desactivar' : 'Activar'}
+                      </button>
+                      <button style={s.btnAction} onClick={() => navigate(`/superadmin/companies/${c.id_microempresa}/clientes`)}>
+                        <Users size={14}/> Clientes
                       </button>
                     </div>
                   </td>

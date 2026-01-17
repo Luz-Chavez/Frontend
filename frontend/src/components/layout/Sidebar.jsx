@@ -22,6 +22,7 @@ const Sidebar = () => {
     superadmin: [
       { icon: LayoutDashboard, text: "Dashboard", path: "/superadmin/dashboard" },
       { icon: Building2, text: "Microempresas", path: "/superadmin/companies" },
+      { icon: Users, text: "Clientes", path: "/superadmin/clientes" },
       { icon: CreditCard, text: "Planes", path: "/superadmin/plans" },
       { icon: ShieldCheck, text: "SuperAdmins", path: "/superadmin/admins" },
     ],

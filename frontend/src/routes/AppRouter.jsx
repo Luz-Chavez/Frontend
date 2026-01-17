@@ -1,3 +1,5 @@
+import AllClientes from "../pages/superadmin/AllClientes";
+import ClientesByMicroempresa from "../pages/superadmin/ClientesByMicroempresa";
 import SellerDashboard from "../pages/seller/SellerDashboard";
 import SuperadminRegister from "../pages/superadmin/SuperadminRegister";
 import UserProfile from "../pages/user/UserProfile";
@@ -112,6 +114,8 @@ function AppRouter() {
              <Route element={<DashboardLayout />}>
                 <Route path="/superadmin/dashboard" element={<SuperDashboard />} />
                 <Route path="/superadmin/companies" element={<Companies />} />
+                <Route path="/superadmin/companies/:id_microempresa/clientes" element={<ClientesByMicroempresa />} />
+                <Route path="/superadmin/clientes" element={<AllClientes />} />
                 <Route path="/superadmin/plans" element={<PlansManager />} />
                 <Route path="/superadmin/admins" element={<Admins />} />
              </Route>
