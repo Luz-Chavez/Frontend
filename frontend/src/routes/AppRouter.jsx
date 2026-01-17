@@ -1,3 +1,5 @@
+import SellerDashboard from "../pages/seller/SellerDashboard";
+import SuperadminRegister from "../pages/superadmin/SuperadminRegister";
 import UserProfile from "../pages/user/UserProfile";
 import CreateMicroempresaOnboarding from "../pages/onboarding/CreateMicroempresaOnboarding";
 import AdminMicroempresaProfile from "../pages/dashboard/AdminMicroempresaProfile";
@@ -24,6 +26,10 @@ import DashboardHome from "../pages/dashboard/Home";
 import Users from "../pages/dashboard/Users";
 import Subscription from "../pages/dashboard/Subscription";
 import CompanyProfile from "../pages/dashboard/CompanyProfile"; // ✅ Importado
+import ClientesList from "../pages/dashboard/ClientesList";
+import EditCliente from "../pages/dashboard/EditCliente";
+import ClienteCreate from "../pages/dashboard/ClienteCreate";
+// Las siguientes vistas pueden reutilizar ClientesList con props o crear componentes separados si se requiere.
 
 // Páginas SuperAdmin (Flujo D)
 import SuperDashboard from "../pages/superadmin/Dashboard"; 
@@ -34,6 +40,7 @@ import Profile from "../pages/dashboard/Profile";
 import AdminsDashboard from "../pages/dashboard/Admins";
 import Vendedores from "../pages/dashboard/Vendedores";
 import CompanyEdit from "../pages/dashboard/CompanyEdit";
+import VendedorCreate from "../pages/dashboard/VendedorCreate";
 
 // Páginas Onboarding (Flujo A)
 import OnboardingProfile from "../pages/onboarding/UserProfile"; 
@@ -41,7 +48,8 @@ import Plans from "../pages/onboarding/Plans";
 import Payment from "../pages/onboarding/Payment";
 
 // Páginas Vendedor (Flujo C)
-import SellerProfile from "../pages/seller/Profile";     
+import SellerProfile from "../pages/seller/Profile";
+import SellerSubscription from "../pages/seller/SellerSubscription";
 
 function AppRouter() {
   return (
@@ -52,8 +60,9 @@ function AppRouter() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/register-superadmin" element={<SuperadminRegister />} />
           <Route path="/recovery" element={<Recovery />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/auth/reset-password" element={<ResetPassword />} />
           <Route path="/unauthorized" element={<h1>No tienes permiso</h1>} />
 
           {/* 🟡 FLUJO A: Onboarding SOLO para usuario */}
@@ -69,6 +78,13 @@ function AppRouter() {
              {/* Usamos Layout para que tenga Sidebar y pueda cerrar sesión */}
              <Route element={<DashboardLayout />}>
                 <Route path="/seller/profile" element={<SellerProfile />} />
+                <Route path="/seller/dashboard" element={<SellerDashboard />} />
+                <Route path="/seller/subscription" element={<SellerSubscription />} />
+                <Route path="/seller/clientes" element={<ClientesList />} />
+                <Route path="/seller/clientes/activos" element={<ClientesList tipo="activos" />} />
+                <Route path="/seller/clientes/inactivos" element={<ClientesList tipo="inactivos" />} />
+                <Route path="/seller/clientes/crear" element={<ClienteCreate />} />
+                <Route path="/seller/clientes/editar/:id_cliente" element={<EditCliente />} />
              </Route>
           </Route>
 
@@ -82,6 +98,12 @@ function AppRouter() {
                 <Route path="/dashboard/company-edit" element={<CompanyEdit />} />
                 <Route path="/dashboard/admins" element={<AdminsDashboard />} />
                 <Route path="/dashboard/vendedores" element={<Vendedores />} />
+                <Route path="/dashboard/vendedores/crear" element={<VendedorCreate />} />
+                <Route path="/dashboard/clientes" element={<ClientesList />} />
+                <Route path="/dashboard/clientes/activos" element={<ClientesList tipo="activos" />} />
+                <Route path="/dashboard/clientes/inactivos" element={<ClientesList tipo="inactivos" />} />
+                <Route path="/dashboard/clientes/crear" element={<ClienteCreate />} />
+                <Route path="/dashboard/clientes/editar/:id_cliente" element={<EditCliente />} />
              </Route>
           </Route>
 

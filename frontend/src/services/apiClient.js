@@ -8,6 +8,19 @@ const apiClient = axios.create({
   },
 });
 
+// Interceptor de petición para agregar token si existe
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Interceptor de respuesta para manejo de errores comunes
 apiClient.interceptors.response.use(
   response => response,

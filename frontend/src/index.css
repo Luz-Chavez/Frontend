@@ -2,8 +2,20 @@
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  background-color: #F3F4F6; /* El gris claro de tus capturas */
-  color: #111827;
+  /* Paleta de colores principal */
+  --color-bg-main: #042326;
+  --color-primary-1: #0A3A40;
+  --color-primary-2: #0F5959;
+  --color-primary-3: #1D7373;
+  --color-primary-4: #107361;
+  /* Colores complementarios */
+  --color-white-soft: #F5F7F8;
+  --color-gray-light: #E6EAEA;
+  --color-success: #4ADE80;
+  --color-error: #F87171;
+  --color-shadow: rgba(16, 115, 97, 0.08);
+  background-color: var(--color-bg-main);
+  color: var(--color-white-soft);
 }
 
 * {
@@ -12,10 +24,82 @@
   padding: 0;
 }
 
-body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--color-bg-main);
+  color: var(--color-white-soft);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-white-soft);
+  font-weight: 700;
+  margin-bottom: 0.5em;
+}
+
+p, span, label, li {
+  color: var(--color-white-soft);
+}
+
+.card {
+  background: var(--color-primary-1);
+  border-radius: 1rem;
+  box-shadow: 0 4px 16px var(--color-shadow);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  transition: box-shadow 0.2s;
+}
+.card:hover {
+  box-shadow: 0 8px 32px var(--color-shadow);
+}
+
+.btn {
+  background: var(--color-primary-3);
+  color: var(--color-white-soft);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn:hover {
+  background: var(--color-primary-4);
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: var(--color-bg-main);
+}
+.btn-error {
+  background: var(--color-error);
+  color: var(--color-white-soft);
+}
+
+.input {
+  background: var(--color-primary-2);
+  color: var(--color-white-soft);
+  border: 1px solid var(--color-gray-light);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary-3);
+}
+
+.subtitle {
+  color: var(--color-primary-3);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.shadow {
+  box-shadow: 0 4px 16px var(--color-shadow);
+}
 }
 
 button {

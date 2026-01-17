@@ -9,14 +9,40 @@ const AuthProvider = ({ children }) => {
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Refresca la información de la microempresa en el contexto
+  const refreshMicroempresa = async () => {
+    if (!user) return;
+    const apiClient = (await import('../services/apiClient')).default;
+    try {
+      if (user.rol === 'adminmicroempresa') {
+        const admRes = await apiClient.get(`/admins/${user.id_usuario}`);
+        if (admRes.data && admRes.data.id_microempresa) {
+          // Si la respuesta tiene microempresa anidada, úsala
+          const empresa = admRes.data.microempresa ? admRes.data.microempresa : admRes.data;
+          setUser(prev => ({ ...prev, has_microempresa: true, microempresa: empresa }));
+        }
+      }
+      if (user.rol === 'vendedor') {
+        const vendRes = await apiClient.get(`/vendedores/${user.id_usuario}`);
+        if (vendRes.data && vendRes.data.id_microempresa) {
+          const empresa = vendRes.data.microempresa ? vendRes.data.microempresa : vendRes.data;
+          setUser(prev => ({ ...prev, has_microempresa: true, microempresa: empresa }));
+        }
+      }
+    } catch {
+      // No actualizar si falla
+    }
+  };
+
 
   const signup = async (user) => {
     try {
       const res = await registerRequest(user);
-      setUser(res.data);
-      setIsAuthenticated(true);
+      // No autenticar ni setear usuario tras registro
+      return res.data;
     } catch (error) {
       setErrors(error.response?.data || ["Error al registrar"]);
+      return false;
     }
   };
 
@@ -36,15 +62,35 @@ const AuthProvider = ({ children }) => {
       // Obtener datos del usuario autenticado
       const meRes = await getMeRequest();
       let userData = meRes.data;
-      // Si es adminmicroempresa, consultar si tiene microempresa asociada
-      if (userData.rol === 'adminmicroempresa') {
+      // Si es adminmicroempresa o vendedor, consultar si tiene microempresa asociada
+      if (userData.rol === 'adminmicroempresa' || userData.rol === 'vendedor') {
         try {
-          const admRes = await apiClient.get(`/admins/${userData.id_usuario}`);
-          // Si la respuesta es 200 y tiene microempresa, agregar has_microempresa=true
-          if (admRes.data && admRes.data.id_microempresa) {
-            userData = { ...userData, has_microempresa: true, microempresa: admRes.data };
-          } else {
-            userData = { ...userData, has_microempresa: false };
+          // Para adminmicroempresa
+          if (userData.rol === 'adminmicroempresa') {
+            const admRes = await apiClient.get(`/admins/${userData.id_usuario}`);
+            if (admRes.data && admRes.data.id_microempresa) {
+              // Recuperar la microempresa por el id
+              const microempresaRes = await apiClient.get(`/microempresas/${admRes.data.id_microempresa}`);
+              const empresa = microempresaRes.data;
+              userData = { ...userData, has_microempresa: true, microempresa: empresa };
+            } else {
+              userData = { ...userData, has_microempresa: false, microempresa: null };
+            }
+          }
+          // Para vendedor
+          if (userData.rol === 'vendedor') {
+            const vendRes = await apiClient.get(`/vendedores/${userData.id_usuario}`);
+            if (vendRes.data && vendRes.data.id_microempresa) {
+              // Recuperar la microempresa por el id
+              const microempresaRes = await apiClient.get(`/microempresas/${vendRes.data.id_microempresa}`);
+              const empresa = microempresaRes.data;
+              userData = { ...userData, has_microempresa: true, microempresa: empresa };
+              console.log('Usuario vendedor:', userData);
+              console.log('Microempresa asociada:', empresa);
+            } else {
+              userData = { ...userData, has_microempresa: false, microempresa: null };
+              console.log('Usuario vendedor sin microempresa:', userData);
+            }
           }
         } catch {
           userData = { ...userData, has_microempresa: false };
@@ -90,8 +136,10 @@ const AuthProvider = ({ children }) => {
         logout,
         loading,
         user,
+        setUser, // <-- Exponer setUser para que useAuth() lo devuelva
         isAuthenticated,
         errors,
+        refreshMicroempresa,
       }}
     >
       {children}

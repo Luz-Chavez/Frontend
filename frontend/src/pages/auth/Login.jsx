@@ -33,34 +33,90 @@ function Login() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#fff', borderRadius: 16, boxShadow: '0 2px 16px #0002', padding: 40, minWidth: 340, maxWidth: 380 }}>
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div style={{ fontWeight: 700, fontSize: 28, color: '#10B981', marginBottom: 8 }}>Iniciar Sesión</div>
-          <div style={{ color: '#6B7280', fontSize: 15 }}>Accede a tu cuenta para continuar</div>
+    <div style={{
+      minHeight: '100vh',
+      width: '100vw',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #0A3A40 0%, #1D7373 100%)'
+    }}>
+      <div style={{
+        background: '#fff',
+        borderRadius: '20px',
+        boxShadow: '0 4px 32px rgba(16, 115, 97, 0.10)',
+        padding: '40px 32px',
+        minWidth: 370,
+        maxWidth: 410,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      }}>
+        <div style={{
+          background: '#1D7373',
+          width: 64,
+          height: 64,
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 24
+        }}>
+          {/* Icono simple tipo edificio/empresa */}
+          <svg width="36" height="36" fill="none" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="12" fill="none" />
+            <rect x="6" y="9" width="12" height="9" rx="2" fill="#fff" />
+            <rect x="9" y="12" width="2" height="2" rx="1" fill="#1D7373" />
+            <rect x="13" y="12" width="2" height="2" rx="1" fill="#1D7373" />
+            <rect x="9" y="15" width="2" height="2" rx="1" fill="#1D7373" />
+            <rect x="13" y="15" width="2" height="2" rx="1" fill="#1D7373" />
+          </svg>
+        </div>
+        <div style={{ fontWeight: 500, fontSize: 28, color: '#0A3A40', marginBottom: 8, textAlign: 'center' }}>Bienvenido</div>
+        <div style={{ color: '#0A3A40', fontSize: 17, marginBottom: 28, textAlign: 'center' }}>
+          Ingresa tus credenciales para acceder al sistema
         </div>
         {errors.map((error, i) => (
-          <div key={i} style={{ background: '#F87171', color: 'white', padding: '10px', borderRadius: 8, marginBottom: 10 }}>{error}</div>
+          <div key={i} style={{ background: '#F87171', color: 'white', padding: '10px', borderRadius: 8, marginBottom: 10, textAlign: 'center', width: '100%' }}>{error}</div>
         ))}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <label style={{ color: '#374151', fontWeight: 500 }}>Email</label>
+        <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <label style={{ color: '#0A3A40', fontWeight: 500, marginBottom: 4 }}>Email</label>
           <input
             type="email"
-            placeholder="Ej: admin@empresa.com"
+            placeholder="usuario@ejemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={{ padding: '12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 15 }}
+            style={{
+              padding: '12px',
+              borderRadius: 8,
+              border: '1px solid #E6EAEA',
+              fontSize: 16,
+              marginBottom: 12,
+              background: '#F5F7F8',
+              color: '#0A3A40',
+              outline: 'none'
+            }}
           />
-          <label style={{ color: '#374151', fontWeight: 500 }}>Contraseña</label>
-          <div style={{ position: 'relative' }}>
+          <label style={{ color: '#0A3A40', fontWeight: 500, marginBottom: 4 }}>Contraseña</label>
+          <div style={{ position: 'relative', marginBottom: 12 }}>
             <input
               type={showPassword ? "text" : "password"}
-              placeholder="Tu contraseña"
+              placeholder=""
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style={{ padding: '12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 15, width: '100%' }}
+              style={{
+                padding: '12px',
+                borderRadius: 8,
+                border: '1px solid #E6EAEA',
+                fontSize: 16,
+                width: '100%',
+                background: '#F5F7F8',
+                color: '#0A3A40',
+                outline: 'none'
+              }}
             />
             <button
               type="button"
@@ -72,7 +128,7 @@ function Login() {
                 transform: 'translateY(-50%)',
                 background: 'none',
                 border: 'none',
-                color: '#10B981',
+                color: '#1D7373',
                 fontWeight: 600,
                 cursor: 'pointer',
                 fontSize: 14
@@ -81,15 +137,29 @@ function Login() {
               {showPassword ? 'Ocultar' : 'Mostrar'}
             </button>
           </div>
-          <button type="submit" style={{ padding: '12px', background: '#10B981', color: 'white', border: 'none', borderRadius: 8, fontWeight: 600, fontSize: 16, marginTop: 8 }}>
-            Ingresar
+          <div style={{ textAlign: 'right', marginBottom: 18 }}>
+            <Link to="/recovery" style={{ color: '#1D7373', textDecoration: 'none', fontSize: 15, fontWeight: 500 }}>
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
+          <button type="submit" style={{
+            padding: '12px',
+            background: '#1D7373',
+            color: 'white',
+            border: 'none',
+            borderRadius: 8,
+            fontWeight: 600,
+            fontSize: 18,
+            marginTop: 8,
+            width: '100%',
+            boxShadow: '0 2px 8px rgba(16, 115, 97, 0.08)'
+          }}>
+            Iniciar sesión
           </button>
         </form>
-        <div style={{ marginTop: 18, textAlign: 'center', fontSize: 14 }}>
-          <Link to="/recovery" style={{ color: '#10B981', textDecoration: 'underline' }}>¿Olvidaste tu contraseña?</Link>
-        </div>
-        <div style={{ marginTop: 10, textAlign: 'center', fontSize: 14 }}>
-          ¿No tienes cuenta? <Link to="/register" style={{ color: '#10B981', textDecoration: 'underline' }}>Regístrate</Link>
+        <div style={{ marginTop: 18, textAlign: 'center', fontSize: 15, color: '#0A3A40' }}>
+          ¿No tienes cuenta?{' '}
+          <Link to="/register" style={{ color: '#1D7373', textDecoration: 'none', fontWeight: 600 }}>Crear cuenta</Link>
         </div>
       </div>
     </div>

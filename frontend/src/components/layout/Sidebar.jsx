@@ -31,10 +31,14 @@ const Sidebar = () => {
       { icon: Building2, text: "Editar Empresa", path: "/dashboard/company-edit" },
       { icon: ShieldCheck, text: "Admins de la Empresa", path: "/dashboard/admins" },
       { icon: Users, text: "Vendedores", path: "/dashboard/vendedores" },
+      { icon: Users, text: "Clientes", path: "/dashboard/clientes" },
       { icon: CreditCard, text: "Suscripción", path: "/dashboard/subscription" },
     ],
     vendedor: [
       { icon: User, text: "Mi Perfil", path: "/seller/profile" },
+      { icon: LayoutDashboard, text: "Dashboard", path: "/seller/dashboard" },
+      { icon: CreditCard, text: "Suscripción", path: "/seller/subscription" },
+      { icon: Users, text: "Clientes", path: "/seller/clientes" },
     ]
   };
 
@@ -46,10 +50,24 @@ const Sidebar = () => {
       <div style={styles.logoArea}>
         <div style={styles.logoTitle}>
           <Building2 size={28} color="#10B981" />
-          <span>{user?.role === 'superadmin' ? 'Sistema SaaS' : 'Tienda La Esquina'}</span>
+          <span>
+            {user?.rol === 'superadmin'
+              ? 'Sistema SaaS'
+              : (user?.rol === 'adminmicroempresa' || user?.rol === 'vendedor')
+                ? (user?.microempresa && typeof user.microempresa === 'object' && user.microempresa.nombre
+                    ? user.microempresa.nombre
+                    : 'Empresa')
+                : 'Empresa'}
+          </span>
         </div>
         <div style={styles.subtitle}>
-          {user?.role === 'superadmin' ? 'Panel SuperAdmin' : 'Panel de Admin'}
+          {user?.rol === 'superadmin'
+            ? 'Panel SuperAdmin'
+            : user?.rol === 'adminmicroempresa'
+              ? 'Panel de Admin'
+              : user?.rol === 'vendedor'
+                ? 'Panel de Vendedor'
+                : ''}
         </div>
       </div>
 
