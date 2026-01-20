@@ -31,6 +31,11 @@ import CompanyProfile from "../pages/dashboard/CompanyProfile"; // ✅ Importado
 import ClientesList from "../pages/dashboard/ClientesList";
 import EditCliente from "../pages/dashboard/EditCliente";
 import ClienteCreate from "../pages/dashboard/ClienteCreate";
+import ProductosVista from "../pages/dashboard/Productos";
+import CategoriasVista from "../pages/dashboard/Categorias";
+import Notificaciones from "../pages/Notificaciones";
+import ProductosGlobalSuperadmin from "../pages/superadmin/ProductosGlobalSuperadmin";
+import CategoriasGlobalSuperadmin from "../pages/superadmin/CategoriasGlobalSuperadmin";
 // Las siguientes vistas pueden reutilizar ClientesList con props o crear componentes separados si se requiere.
 
 // Páginas SuperAdmin (Flujo D)
@@ -56,8 +61,12 @@ import SellerSubscription from "../pages/seller/SellerSubscription";
 function AppRouter() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+         <BrowserRouter>
+            <Routes>
+               {/* Ruta global para notificaciones, visible para todos los roles, con sidebar */}
+               <Route element={<DashboardLayout />}>
+                  <Route path="/notificaciones" element={<Notificaciones />} />
+               </Route>
           {/* --- RUTAS PÚBLICAS --- */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
@@ -77,7 +86,6 @@ function AppRouter() {
 
           {/* 🔵 FLUJO C: Vendedor */}
           <Route element={<RoleGuard allowedRoles={['vendedor']} />}>
-             {/* Usamos Layout para que tenga Sidebar y pueda cerrar sesión */}
              <Route element={<DashboardLayout />}>
                 <Route path="/seller/profile" element={<SellerProfile />} />
                 <Route path="/seller/dashboard" element={<SellerDashboard />} />
@@ -87,6 +95,7 @@ function AppRouter() {
                 <Route path="/seller/clientes/inactivos" element={<ClientesList tipo="inactivos" />} />
                 <Route path="/seller/clientes/crear" element={<ClienteCreate />} />
                 <Route path="/seller/clientes/editar/:id_cliente" element={<EditCliente />} />
+                {/* Si quieres una vista de productos para vendedor, usa una ruta diferente aquí */}
              </Route>
           </Route>
 
@@ -106,6 +115,8 @@ function AppRouter() {
                 <Route path="/dashboard/clientes/inactivos" element={<ClientesList tipo="inactivos" />} />
                 <Route path="/dashboard/clientes/crear" element={<ClienteCreate />} />
                 <Route path="/dashboard/clientes/editar/:id_cliente" element={<EditCliente />} />
+                <Route path="/dashboard/productos" element={<ProductosVista />} />
+                <Route path="/dashboard/categorias" element={<CategoriasVista />} />
              </Route>
           </Route>
 
@@ -116,6 +127,9 @@ function AppRouter() {
                 <Route path="/superadmin/companies" element={<Companies />} />
                 <Route path="/superadmin/companies/:id_microempresa/clientes" element={<ClientesByMicroempresa />} />
                 <Route path="/superadmin/clientes" element={<AllClientes />} />
+                {/* Vista global de productos para superadmin */}
+                <Route path="/superadmin/productos" element={<ProductosGlobalSuperadmin />} />
+                <Route path="/superadmin/categorias" element={<CategoriasGlobalSuperadmin />} />
                 <Route path="/superadmin/plans" element={<PlansManager />} />
                 <Route path="/superadmin/admins" element={<Admins />} />
              </Route>

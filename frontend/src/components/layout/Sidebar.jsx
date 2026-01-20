@@ -1,10 +1,13 @@
 import { useAuth } from "../../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, CreditCard, User, Building2, ShieldCheck, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, CreditCard, User, Building2, ShieldCheck, LogOut, Box, Tags } from "lucide-react";
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  // Los logs deben ir después de inicializar location
+  console.log("[Sidebar] user:", user);
+  console.log("[Sidebar] location:", location.pathname);
 
   const styles = {
     sidebar: { width: '260px', height: '100vh', backgroundColor: '#002F2C', color: 'white', display: 'flex', flexDirection: 'column', position: 'fixed', left: 0, top: 0 },
@@ -23,7 +26,9 @@ const Sidebar = () => {
       { icon: LayoutDashboard, text: "Dashboard", path: "/superadmin/dashboard" },
       { icon: Building2, text: "Microempresas", path: "/superadmin/companies" },
       { icon: Users, text: "Clientes", path: "/superadmin/clientes" },
+      { icon: Box, text: "Productos", path: "/superadmin/productos" },
       { icon: CreditCard, text: "Planes", path: "/superadmin/plans" },
+      { icon: Tags, text: "Categorías", path: "/superadmin/categorias" },
       { icon: ShieldCheck, text: "SuperAdmins", path: "/superadmin/admins" },
     ],
     adminmicroempresa: [
@@ -33,6 +38,9 @@ const Sidebar = () => {
       { icon: ShieldCheck, text: "Admins de la Empresa", path: "/dashboard/admins" },
       { icon: Users, text: "Vendedores", path: "/dashboard/vendedores" },
       { icon: Users, text: "Clientes", path: "/dashboard/clientes" },
+      // Asegurarse que la ruta de productos es la de adminmicroempresa
+      { icon: Box, text: "Productos", path: "/dashboard/productos" },
+      { icon: Tags, text: "Categorías", path: "/dashboard/categorias" },
       { icon: CreditCard, text: "Suscripción", path: "/dashboard/subscription" },
     ],
     vendedor: [
@@ -73,6 +81,18 @@ const Sidebar = () => {
       </div>
 
       <nav style={styles.nav}>
+        {/* Opción de notificaciones visible para todos */}
+        <Link
+          to="/notificaciones"
+          style={{
+            ...styles.link,
+            ...(location.pathname === "/notificaciones" ? styles.activeLink : {})
+          }}
+        >
+          {/* Campana de lucide-react, si no está importada, usar <span>🔔</span> */}
+          <svg style={{ marginRight: 12 }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F5F7F8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Notificaciones
+        </Link>
         {currentMenu.map((item, index) => {
           const isActive = location.pathname === item.path;
           return (

@@ -100,7 +100,7 @@ p, span, label, li {
 .shadow {
   box-shadow: 0 4px 16px var(--color-shadow);
 }
-}
+
 
 button {
   font-family: inherit;
