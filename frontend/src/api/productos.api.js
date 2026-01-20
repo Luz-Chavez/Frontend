@@ -56,5 +56,6 @@ export const getProductosConStock = () =>
   apiClient.get('/productos/con-stock');
 
 // Listar productos sin stock
-export const getProductosSinStock = () =>
-  apiClient.get('/productos/sin-stock');
+// Listar productos sin stock por microempresa
+export const getProductosSinStockPorMicroempresa = (id_microempresa) =>
+  apiClient.get(`/productos/microempresa/${id_microempresa}/sin-stock`);
