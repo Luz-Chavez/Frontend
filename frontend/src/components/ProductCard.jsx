@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import ProductStockDetail from "./ProductStockDetail";
 import { Power } from "lucide-react";
 
+// URL de tu Backend (ajusta si usas otro puerto, pero por defecto es 8000)
+const BASE_URL = "http://localhost:8000";
+
 const palette = {
   fondoCard: "linear-gradient(135deg, #0A3A40 60%, #0F5959 100%)",
   textoClaro: "#F5F7F8",
@@ -22,6 +25,13 @@ function ProductCard({ producto, stock, onEdit, onToggle, onDelete }) {
     imagen,
     estado,
   } = producto;
+
+  // Lógica para construir la URL de la imagen
+  // Si la imagen viene del backend (empieza con /public), le pegamos el dominio.
+  // Si es una URL externa (http...), la dejamos igual.
+  const imageUrl = imagen 
+    ? (imagen.startsWith("http") ? imagen : `${BASE_URL}${imagen}`) 
+    : null;
 
   const estadoActivo = estado === "activo" || estado === true;
   const colorEstado = estadoActivo ? palette.verdeClaro : palette.rojoSuave;
@@ -96,15 +106,20 @@ function ProductCard({ producto, stock, onEdit, onToggle, onDelete }) {
           justifyContent: "center",
         }}
       >
-        {imagen ? (
+        {imageUrl ? (
           <img
-            src={imagen}
+            src={imageUrl}
             alt={nombre}
             style={{
               width: "100%",
               height: "100%",
-              objectFit: "cover",
+              objectFit: "cover", // Esto asegura que la imagen no se estire feo
               display: "block",
+            }}
+            onError={(e) => {
+               // Fallback por si la imagen da error al cargar
+              e.target.style.display = 'none';
+              e.target.parentElement.innerText = 'Error img';
             }}
           />
         ) : (
@@ -213,7 +228,6 @@ function ProductCard({ producto, stock, onEdit, onToggle, onDelete }) {
             style={toggleStyle}
             onClick={() => {
               if (!onToggle) return;
-              // Si está activo, desactivar; si está inactivo, activar
               onToggle(producto.id_producto, estadoActivo);
             }}
             title={estadoActivo ? "Desactivar" : "Activar"}

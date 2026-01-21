@@ -140,11 +140,14 @@ function ProductosVista({
   // Handlers de acciones (simulados)
 
     // Handler para el flujo de creación de producto (paso 1, integración backend)
+    // Busca la función handleProductoCreado dentro de Productos.jsx y REEMPLÁZALA por esta:
+
     const handleProductoCreado = async (productoForm) => {
       if (usuario.rol !== "adminmicroempresa" || !usuario.microempresa?.id_microempresa) return;
+      
       setCreando(true);
       setCrearError("");
-      // Solo enviar los campos requeridos por el backend
+
       const {
         nombre,
         descripcion,
@@ -154,33 +157,56 @@ function ProductosVista({
         estado,
         id_categoria
       } = productoForm;
+
+      // 1. LIMPIEZA DE DATOS:
+      // No enviamos 'id_microempresa' porque el backend lo saca del token.
+      // Convertimos números y aseguramos que no vayan valores nulos.
       const data = {
         nombre,
-        descripcion,
+        descripcion: descripcion || "", 
         precio_venta: Number(precio_venta),
-        costo_compra: Number(costo_compra),
-        codigo,
+        costo_compra: Number(costo_compra) || 0,
+        codigo: codigo || "",
         estado: estado === "activo" || estado === true,
-        id_categoria: Number(id_categoria),
-        id_microempresa: usuario.microempresa.id_microempresa
+        id_categoria: Number(id_categoria)
       };
-      // Si la imagen es un archivo (File), agregarla
+
+      // 2. GESTIÓN DE IMAGEN:
+      // Solo adjuntamos la imagen si el usuario realmente seleccionó un archivo.
+      // Si enviamos un string vacío "", el backend fallará esperando un archivo.
       if (productoForm.imagen instanceof File) {
         data.imagen = productoForm.imagen;
       }
+
       try {
         const res = await crearProducto(data);
-        setProductoCreado(res.data); // Abre el modal de stock
+        
+        // Si llegamos aquí, ¡Éxito!
+        setProductoCreado(res.data); // Esto abrirá el formulario de Stock
         setModalCrear(false);
-        // Refrescar productos
-        getProductosActivosConStock(usuario.microempresa.id_microempresa).then(r => setProductos(r.data));
-      } catch {
-        setCrearError("Error al crear producto. Verifica los datos.");
+        
+        // Actualizamos la lista de fondo
+        getProductosActivosConStock(usuario.microempresa.id_microempresa)
+          .then(r => setProductos(r.data));
+
+      } catch (err) {
+        console.error("Error detallado:", err);
+        
+        // 3. CAPTURA DEL ERROR REAL:
+        // Extraemos el mensaje específico que nos manda FastAPI (ej: "Field required", "Not authorized")
+        const mensajeBackend = err.response?.data?.detail;
+        
+        // Si el mensaje es un objeto (común en errores de validación), lo convertimos a texto
+        const mensajeMostrar = typeof mensajeBackend === 'object' 
+          ? JSON.stringify(mensajeBackend) 
+          : (mensajeBackend || "Error desconocido al contactar al servidor.");
+
+        setCrearError(`Error del servidor: ${mensajeMostrar}`);
       } finally {
         setCreando(false);
       }
     };
-
+    
     // Handler para el flujo de creación de stock (paso 2)
     const handleStockCreado = stock => {
       setProductosEditados(prev => [
