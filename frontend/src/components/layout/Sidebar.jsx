@@ -1,6 +1,6 @@
 import { useAuth } from "../../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, CreditCard, User, Building2, ShieldCheck, LogOut, Box, Tags } from "lucide-react";
+import { LayoutDashboard, Users, CreditCard, User, Building2, ShieldCheck, LogOut, Box, Tags, ShoppingBag } from "lucide-react";
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
@@ -38,6 +38,9 @@ const Sidebar = () => {
       { icon: ShieldCheck, text: "Admins de la Empresa", path: "/dashboard/admins" },
       { icon: Users, text: "Vendedores", path: "/dashboard/vendedores" },
       { icon: Users, text: "Clientes", path: "/dashboard/clientes" },
+
+      { icon: ShoppingBag, text: "Ventas / Pedidos", path: "/dashboard/ventas" },
+
       // Asegurarse que la ruta de productos es la de adminmicroempresa
       { icon: Box, text: "Productos", path: "/dashboard/productos" },
       { icon: Tags, text: "Categorías", path: "/dashboard/categorias" },

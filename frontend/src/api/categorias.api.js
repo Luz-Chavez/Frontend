@@ -1,6 +1,23 @@
-// Listar categorías activas
+//import apiClient from '../services/apiClient';
+
+/**
+ * Obtiene las categorías de una microempresa específica.
+ * Esta es la función que usa el Portal.
+ */
+export const getCategoriasActivas = (id_microempresa) => {
+  // Si no hay ID, retornamos una promesa rechazada para evitar llamadas erróneas
+  if (!id_microempresa) return Promise.reject("ID de microempresa es requerido");
+  
+  // Llamamos a la ruta correcta que vimos en el backend:
+  // @router.get("/microempresas/{id_microempresa}/categorias")
+  return apiClient.get(`/productos/microempresas/${id_microempresa}/categorias`);
+};
+
+
+/* Listar categorías activas
 export const getCategoriasActivas = () =>
   apiClient.get('/productos/categoria/activas');
+*/
 
 // Listar categorías inactivas
 export const getCategoriasInactivas = () =>

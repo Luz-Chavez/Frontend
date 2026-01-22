@@ -1,31 +1,37 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom'; // Agregado useParams
 import { getProductosConStock } from '../../api/productos.api';
 import { getCategoriasActivas } from '../../api/categorias.api';
+
+// --- NUEVOS COMPONENTES ---
+import CartWidget from '../../components/portal/CartWidget';
+import CartDrawer from '../../components/portal/CartDrawer';
+import CardProducto from '../../components/portal/CardProducto';
+
 import './Portal.css';
 
 /**
- * Componentes de Iconos SVG para evitar dependencias externas.
- * Replican el estilo visual de la imagen de referencia.
+ * Componentes de Iconos SVG
  */
 const IconSearch = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
 );
-const IconCart = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-);
+// IconCart ya no es necesario porque lo maneja CartWidget, pero lo puedes dejar si quieres
 const IconHeart = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
 );
 const IconUser = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
 );
-const IconFilter = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-);
 
 export default function Portal() {
-    // Estados de datos y control
+    // 1. Obtener ID de la empresa de la URL (asegúrate que tu ruta sea /portal/:id_microempresa)
+    const { id_microempresa } = useParams();
+    
+    // 2. Estado para el Drawer del Carrito
+    const [isCartOpen, setIsCartOpen] = useState(false);
+
+    // Estados de datos
     const [productos, setProductos] = useState([]);
     const [categorias, setCategorias] = useState([]);
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
@@ -33,18 +39,20 @@ export default function Portal() {
     const [cargando, setCargando] = useState(true);
 
     const navigate = useNavigate();
-    const BASE_URL = 'http://localhost:8000'; // Ajustar según backend
 
     // Carga inicial de datos
     useEffect(() => {
-        cargarDatos();
-    }, []);
+        if (id_microempresa) {
+            cargarDatos(id_microempresa);
+        }
+    }, [id_microempresa]);
 
-    const cargarDatos = async () => {
+    const cargarDatos = async (id) => {
         try {
+            // Nota: Asegúrate de que tus APIs acepten el ID si es necesario
             const [resProductos, resCategorias] = await Promise.all([
-                getProductosConStock(),
-                getCategoriasActivas()
+                getProductosConStock(id), // Pasar ID si la API lo requiere
+                getCategoriasActivas(id)
             ]);
             setProductos(resProductos.data);
             setCategorias(resCategorias.data);
@@ -65,32 +73,34 @@ export default function Portal() {
     return (
         <div className="portal-wrapper">
             
+            {/* 3. COMPONENTE DRAWER (Panel Lateral) */}
+            <CartDrawer 
+                isOpen={isCartOpen} 
+                onClose={() => setIsCartOpen(false)} 
+                idMicroempresa={id_microempresa} 
+            />
+
             {/* SECCIÓN SUPERIOR: NAVEGACIÓN Y LOGO */}
             <header className="site-header">
-                {/* 1. Top Nav (Izquierda) 
-                <nav className="top-nav-links">
-                    <a href="#" className="nav-link">MUJER</a>
-                    <a href="#" className="nav-link">HOMBRE</a>
-                    <a href="#" className="nav-link active-section">NIÑAS Y NIÑOS</a>
-                    <a href="#" className="nav-link">FAMILIA</a>
-                </nav>*/}
-
-                {/* 2. Logo (Centro) */}
+                {/* Logo (Centro) */}
                 <div className="brand-logo">
                     NUESTRA TIENDA
                     <span className="trademark">®</span>
                 </div>
 
-                {/* 3. Iconos Funcionales (Derecha) */}
+                {/* 4. Iconos Funcionales (Derecha) */}
                 <div className="header-icons">
                     <button className="icon-btn" title="Buscar"><IconSearch /></button>
-                    <button className="icon-btn" title="Carrito"><IconCart /></button>
+                    
+                    {/* AQUÍ REEMPLAZAMOS EL BOTÓN ESTÁTICO POR EL WIDGET */}
+                    <CartWidget onOpen={() => setIsCartOpen(true)} />
+                    
                     <button className="icon-btn" title="Favoritos"><IconHeart /></button>
                     <button className="icon-btn" title="Cuenta" onClick={() => navigate('/login')}><IconUser /></button>
                 </div>
             </header>
 
-            {/* SECCIÓN DE BARRA DE HERRAMIENTAS (Igual a la imagen) */}
+            {/* SECCIÓN DE BARRA DE HERRAMIENTAS */}
             <div className="toolbar-container">
                 <div className="toolbar-left">
                     <button className="btn-ocultar-filtros">
@@ -130,7 +140,6 @@ export default function Portal() {
                             >
                                 Ver Todo
                             </li>
-                            {/* Renderizado de categorías reales */}
                             {categorias.map((cat) => (
                                 <li 
                                     key={cat.id_categoria}
@@ -152,20 +161,8 @@ export default function Portal() {
                         <div className="grid-layout">
                             {productosFiltrados.length > 0 ? (
                                 productosFiltrados.map((prod) => (
-                                    <div key={prod.id_producto} className="product-card">
-                                        <div className="card-image">
-                                            <img 
-                                                src={prod.imagen ? `${BASE_URL}${prod.imagen}` : "https://via.placeholder.com/300x400?text=Producto"} 
-                                                alt={prod.nombre} 
-                                            />
-                                        </div>
-                                        <div className="card-info">
-                                            <h4 className="card-title">{prod.nombre}</h4>
-                                            <p className="card-price">{parseFloat(prod.precio_venta).toFixed(2)}</p>
-                                            
-                                            
-                                        </div>
-                                    </div>
+                                    /* 5. USAR EL NUEVO COMPONENTE CARD */
+                                    <CardProducto key={prod.id_producto} producto={prod} />
                                 ))
                             ) : (
                                 <div className="no-results">
