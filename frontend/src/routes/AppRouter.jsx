@@ -6,6 +6,8 @@ import UserProfile from "../pages/user/UserProfile";
 import CreateMicroempresaOnboarding from "../pages/onboarding/CreateMicroempresaOnboarding";
 import AdminMicroempresaProfile from "../pages/dashboard/AdminMicroempresaProfile";
 import UserPlanDetail from "../pages/user/UserPlanDetail";
+import GlobalNotifications from "../components/GlobalNotifications";
+
                {/* 🟣 FLUJO USER SIMPLE */}
                <Route element={<RoleGuard allowedRoles={['user']} />}>
                   <Route path="/user/profile" element={<UserProfile />} />
@@ -64,6 +66,7 @@ import SellerSubscription from "../pages/seller/SellerSubscription";
 function AppRouter() {
    return (
    <AuthProvider>
+      <GlobalNotifications />
          <BrowserRouter>
             <Routes>
                {/* Ruta global para notificaciones, visible para todos los roles, con sidebar */}

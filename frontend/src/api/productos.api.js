@@ -1,3 +1,6 @@
+// Listar todos los productos por microempresa
+export const getProductosPorMicroempresa = (id_microempresa) =>
+  apiClient.get(`/productos/microempresa/${id_microempresa}`);
 // Activar producto (POST /productos/{id_producto}/activar)
 export const activarProducto = (id_producto) =>
   apiClient.post(`/productos/${id_producto}/activar`);

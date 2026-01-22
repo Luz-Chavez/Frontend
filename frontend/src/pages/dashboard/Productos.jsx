@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getProductosActivosConStock, getProductosActivosPorMicroempresa, getProductosInactivosSinStockPorMicroempresa, crearProducto, actualizarProducto, eliminarProductoFisico, activarProducto, desactivarProducto, getProductosConStock, getProductosSinStockPorMicroempresa } from "../../api/productos.api";
+import { getProductosActivosConStock, getProductosActivosPorMicroempresa, getProductosInactivosSinStockPorMicroempresa, crearProducto, actualizarProducto, eliminarProductoFisico, activarProducto, desactivarProducto, getProductosConStock, getProductosSinStockPorMicroempresa, getProductosPorMicroempresa } from "../../api/productos.api";
 import { getCategoriasByMicroempresa } from "../../api/categorias.api";
 import { useAuth } from "../../context/AuthContext";
 import ProductCard from "../../components/ProductCard";
@@ -54,7 +54,7 @@ function ProductosVista({
         try {
           let res;
           if (filtroRapido === "todos") {
-            res = await getProductosConStock(usuario.microempresa.id_microempresa);
+            res = await getProductosPorMicroempresa(usuario.microempresa.id_microempresa);
           } else if (filtroRapido === "activos") {
             // Mostrar productos activos por microempresa
             res = await getProductosActivosPorMicroempresa(usuario.microempresa.id_microempresa);

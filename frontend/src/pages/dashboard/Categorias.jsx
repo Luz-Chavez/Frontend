@@ -26,9 +26,12 @@ function CategoriasVista() {
         // Listar categorías por microempresa
         const id_micro = user.microempresa.id || user.microempresa.id_microempresa;
         const res = await apiClient.get(`/productos/categoria/microempresa/${id_micro}`);
+        console.log("[DEBUG] id_micro:", id_micro);
+        console.log("[DEBUG] Respuesta API:", res.data);
         setCategoriasEditadas(res.data);
-      } catch {
+      } catch (e) {
         setError("Error al cargar categorías");
+        console.error("[DEBUG] Error al cargar categorías:", e);
       } finally {
         setLoading(false);
       }
@@ -45,6 +48,9 @@ function CategoriasVista() {
     if (filtro === "inactivas") return !cat.activo;
     return true;
   });
+  // Log de depuración para ver el array filtrado
+  console.log("[DEBUG] categoriasEditadas:", categoriasEditadas);
+  console.log("[DEBUG] categoriasFiltradas:", categoriasFiltradas);
 
   // Handlers reales
   const handleEditar = categoria => setModalEditar(categoria);
@@ -194,8 +200,34 @@ function CategoriasVista() {
       ) : (
         <div style={styles.listado}>
           {categoriasFiltradas.length === 0 ? (
-            <div style={{ color: "#E57373", fontWeight: 500, fontSize: "1.2rem" }}>
-              No hay categorías que coincidan con los filtros.
+            <div style={{
+              background: '#FFF6F6',
+              border: '1.5px solid #E57373',
+              borderRadius: '1em',
+              color: '#B91C1C',
+              fontWeight: 600,
+              fontSize: '1.15rem',
+              padding: '1.2em',
+              margin: '0.5em 0',
+              boxShadow: '0 2px 8px 0 rgba(229,115,115,0.08)',
+              textAlign: 'center',
+              letterSpacing: '0.01em',
+              lineHeight: 1.5
+            }}>
+              <div style={{ fontSize: '1.2rem', marginBottom: 6 }}>
+                <span role="img" aria-label="advertencia" style={{marginRight: 6}}>⚠️</span>
+                No se encontraron categorías para mostrar.
+              </div>
+              <div style={{ fontSize: '1rem', color: '#A94442', marginTop: 4 }}>
+                <strong>Depuración:</strong> El sistema recibió un array vacío de categorías.<br />
+                <span style={{ fontSize: '0.98em', color: '#B91C1C', wordBreak: 'break-all' }}>
+                  <b>ID de microempresa usado:</b> {user?.microempresa?.id || user?.microempresa?.id_microempresa || 'N/A'}<br />
+                  <b>Respuesta de la API:</b> {JSON.stringify(categoriasEditadas)}
+                </span>
+                <div style={{ marginTop: 8, fontSize: '0.97em', color: '#B91C1C', opacity: 0.8 }}>
+                  Si esperabas ver categorías, revisa que el usuario tenga asignada la microempresa correcta y que existan categorías en el backend.
+                </div>
+              </div>
             </div>
           ) : (
             categoriasFiltradas.map(cat => (
