@@ -38,10 +38,11 @@ const Sidebar = () => {
       { icon: ShieldCheck, text: "Admins de la Empresa", path: "/dashboard/admins" },
       { icon: Users, text: "Vendedores", path: "/dashboard/vendedores" },
       { icon: Users, text: "Clientes", path: "/dashboard/clientes" },
-      // Asegurarse que la ruta de productos es la de adminmicroempresa
       { icon: Box, text: "Productos", path: "/dashboard/productos" },
       { icon: Tags, text: "Categorías", path: "/dashboard/categorias" },
       { icon: CreditCard, text: "Suscripción", path: "/dashboard/subscription" },
+      // Nueva opción para ver ventas
+      { icon: CreditCard, text: "Ventas", path: "/dashboard/ventas" },
     ],
     vendedor: [
       { icon: User, text: "Mi Perfil", path: "/seller/profile" },

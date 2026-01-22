@@ -482,3 +482,52 @@
 .checkout-btn:hover {
     background: #cc0000; /* Rojo al pasar el mouse */
 }
+
+
+/* ... TUS ESTILOS ANTERIORES ... */
+
+/* Estilos para el Input de Cantidad Personalizada */
+.custom-qty-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    background: #f1f3f5;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.custom-qty-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 6px 10px;
+    font-size: 13px;
+    width: 100%;
+    outline: none;
+}
+
+/* Ocultar flechas del input number en algunos navegadores */
+.custom-qty-input::-webkit-outer-spin-button,
+.custom-qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.btn-add-custom {
+    background: #222;
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-add-custom:hover {
+    background: #cc0000;
+}

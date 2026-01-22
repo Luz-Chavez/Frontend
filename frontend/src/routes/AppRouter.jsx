@@ -27,6 +27,8 @@ import ClientesList from "../pages/dashboard/ClientesList";
 import EditCliente from "../pages/dashboard/EditCliente";
 import ClienteCreate from "../pages/dashboard/ClienteCreate";
 import ProductosVista from "../pages/dashboard/Productos";
+import VentasMicroempresa from "../pages/dashboard/VentasMicroempresa";
+import DetalleVenta from "../pages/dashboard/DetalleVenta";
 import CategoriasVista from "../pages/dashboard/Categorias";
 import Notificaciones from "../pages/Notificaciones";
 import CompanyEdit from "../pages/dashboard/CompanyEdit";
@@ -125,6 +127,9 @@ function AppRouter() {
                      {/* Gestión de Inventario */}
                      <Route path="/dashboard/productos" element={<ProductosVista />} />
                      <Route path="/dashboard/categorias" element={<CategoriasVista />} />
+                     {/* Ventas de la microempresa */}
+                     <Route path="/dashboard/ventas" element={<VentasMicroempresa />} />
+                     <Route path="/dashboard/ventas/:id_venta" element={<DetalleVenta />} />
                   </Route>
                </Route>
 
