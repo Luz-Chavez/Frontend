@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Portal.css';
 
@@ -12,13 +13,13 @@ const UserIconSmall = () => <svg width="14" height="14" viewBox="0 0 24 24" fill
 const IconPlus = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
 
 export default function Portal() {
+    const navigate = useNavigate();
     // --- ESTADOS ---
     const [productos, setProductos] = useState([]);
     const [carrito, setCarrito] = useState([]);
-    
+    const [nombreMicroempresa, setNombreMicroempresa] = useState('');
     // ✅ ACTUALIZADO: Estado del cliente con documento y email
     const [cliente, setCliente] = useState({ nombre: '', telefono: '', documento: '', email: '' });
-    
     const [tarjeta, setTarjeta] = useState({ numero: '', titular: '', expiracion: '', cvv: '' });
     const [busqueda, setBusqueda] = useState("");
     const [loading, setLoading] = useState(false);
@@ -38,7 +39,16 @@ export default function Portal() {
                 console.error("Error cargando productos:", error);
             }
         };
+        const cargarNombreMicroempresa = async () => {
+            try {
+                const res = await axios.get(`${BASE_URL}/microempresas/${ID_MICROEMPRESA}`);
+                setNombreMicroempresa(res.data.nombre || '');
+            } catch (error) {
+                setNombreMicroempresa('');
+            }
+        };
         cargarProductos();
+        cargarNombreMicroempresa();
     }, []);
 
     const toggleCart = () => setIsCartOpen(!isCartOpen);
@@ -79,7 +89,6 @@ export default function Portal() {
     const procesarVenta = async (e) => {
         e.preventDefault();
         if(carrito.length === 0) return alert("Carrito vacío");
-        if(tarjeta.numero.length < 13) return alert("Revisa la tarjeta.");
         
         setLoading(true);
 
@@ -143,17 +152,42 @@ export default function Portal() {
         <div className="portal-wrapper">
             <header className="site-header">
                 <div className="header-container">
-                    <div className="brand-logo">NUESTRA TIENDA <span className="trademark">®</span></div>
+                    <div className="brand-logo">{nombreMicroempresa || 'Tienda'} <span className="trademark">®</span></div>
                     <div className="search-bar-container">
                         <div className="search-wrapper">
                             <IconSearch />
                             <input type="text" placeholder="Buscar..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)}/>
                         </div>
                     </div>
-                    <div className="header-actions">
+                    <div className="header-actions" style={{display:'flex',alignItems:'center',gap:'10px'}}>
                         <button className="cart-btn" onClick={toggleCart}>
                             <IconCart />
                             {carrito.length > 0 && <span className="cart-badge">{carrito.length}</span>}
+                        </button>
+                        <button 
+                            className="login-btn"
+                            onClick={() => navigate('/login')}
+                            style={{
+                                background: '#10B981',
+                                border: 'none',
+                                color: '#fff',
+                                borderRadius: '50px',
+                                padding: '8px 18px 8px 12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                fontWeight: 600,
+                                fontSize: '15px',
+                                gap: '8px',
+                                boxShadow: '0 2px 8px rgba(16,185,129,0.10)',
+                                cursor: 'pointer',
+                                transition: 'background 0.2s',
+                            }}
+                            title="Acceso a login"
+                            onMouseOver={e => e.currentTarget.style.background = '#059669'}
+                            onMouseOut={e => e.currentTarget.style.background = '#10B981'}
+                        >
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M21 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/></svg>
+                            <span>Iniciar sesión</span>
                         </button>
                     </div>
                 </div>

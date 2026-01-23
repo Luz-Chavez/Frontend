@@ -1,6 +1,6 @@
 import { useAuth } from "../../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, CreditCard, User, Building2, ShieldCheck, LogOut, Box, Tags } from "lucide-react";
+import { LayoutDashboard, Users, CreditCard, User, Building2, ShieldCheck, LogOut, Box, Tags, ShoppingCart } from "lucide-react";
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
@@ -42,7 +42,7 @@ const Sidebar = () => {
       { icon: Tags, text: "Categorías", path: "/dashboard/categorias" },
       { icon: CreditCard, text: "Suscripción", path: "/dashboard/subscription" },
       // Nueva opción para ver ventas
-      { icon: CreditCard, text: "Ventas", path: "/dashboard/ventas" },
+      { icon: ShoppingCart, text: "Ventas", path: "/dashboard/ventas" },
     ],
     vendedor: [
       { icon: User, text: "Mi Perfil", path: "/seller/profile" },

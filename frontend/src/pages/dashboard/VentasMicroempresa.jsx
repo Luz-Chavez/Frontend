@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import axios from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
+import { getClientesInfo } from "../../api/clientes.api";
 
 const VentasMicroempresa = () => {
   const { user } = useAuth();
   const [ventas, setVentas] = useState([]);
+  const [clientesInfo, setClientesInfo] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -14,8 +16,12 @@ const VentasMicroempresa = () => {
     setLoading(true);
     axios
       .get(`/ventas/microempresa/${user.microempresa.id_microempresa}`)
-      .then((res) => {
+      .then(async (res) => {
         setVentas(res.data);
+        // Obtener info de clientes
+        const ids = res.data.map(v => v.id_cliente);
+        const info = await getClientesInfo(ids);
+        setClientesInfo(info);
         setLoading(false);
       })
       .catch((err) => {
@@ -40,7 +46,7 @@ const VentasMicroempresa = () => {
               <th style={{ color: '#fff', padding: 12, textAlign: 'left' }}>Cliente</th>
               <th style={{ color: '#fff', padding: 12, textAlign: 'left' }}>Total</th>
               <th style={{ color: '#fff', padding: 12, textAlign: 'left' }}>Estado</th>
-              <th style={{ color: '#fff', padding: 12, textAlign: 'left' }}>Tipo</th>
+              {/* <th style={{ color: '#fff', padding: 12, textAlign: 'left' }}>Tipo</th> */}
               <th style={{ color: '#fff', padding: 12, textAlign: 'left' }}>Fecha</th>
               <th style={{ color: '#fff', padding: 12, textAlign: 'left' }}>Acciones</th>
             </tr>
@@ -49,10 +55,14 @@ const VentasMicroempresa = () => {
             {ventas.map((venta, idx) => (
               <tr key={venta.id_venta} style={{ background: idx % 2 === 0 ? '#01443C' : '#01322E' }}>
                 <td style={{ color: '#fff', padding: 10 }}>{venta.id_venta}</td>
-                <td style={{ color: '#fff', padding: 10 }}>{venta.id_cliente}</td>
+                <td style={{ color: '#fff', padding: 10 }}>
+                  {clientesInfo[venta.id_cliente]
+                    ? `${clientesInfo[venta.id_cliente].nombre || ''} (${clientesInfo[venta.id_cliente].email || 'Sin correo'})`
+                    : venta.id_cliente}
+                </td>
                 <td style={{ color: '#fff', padding: 10 }}>${venta.total}</td>
                 <td style={{ color: '#fff', padding: 10 }}>{venta.estado}</td>
-                <td style={{ color: '#fff', padding: 10 }}>{venta.tipo}</td>
+                {/* <td style={{ color: '#fff', padding: 10 }}>{venta.tipo}</td> */}
                 <td style={{ color: '#fff', padding: 10 }}>{new Date(venta.fecha).toLocaleString()}</td>
                 <td style={{ padding: 10 }}>
                   <Link to={`/dashboard/ventas/${venta.id_venta}`} style={{ color: '#10B981', textDecoration: 'underline', fontWeight: 500 }}>Ver Detalles</Link>
