@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom'; // Agregado useParams
 import { getProductosConStock } from '../../api/productos.api';
 import { getCategoriasActivas } from '../../api/categorias.api';
+import { getMicroempresaById } from '../../api/microempresas.api';
 
 // --- NUEVOS COMPONENTES ---
 import CartWidget from '../../components/portal/CartWidget';
@@ -28,6 +29,7 @@ export default function Portal() {
     // 1. Obtener ID de la empresa de la URL (asegúrate que tu ruta sea /portal/:id_microempresa)
     const { id_microempresa } = useParams();
 
+
     // 2. Estado para el Drawer del Carrito
     const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -37,15 +39,27 @@ export default function Portal() {
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
     const [busqueda, setBusqueda] = useState("");
     const [cargando, setCargando] = useState(true);
+    const [nombreMicroempresa, setNombreMicroempresa] = useState('');
 
     const navigate = useNavigate();
 
     // Carga inicial de datos
+
     useEffect(() => {
         if (id_microempresa) {
             cargarDatos(id_microempresa);
+            cargarNombreMicroempresa(id_microempresa);
         }
     }, [id_microempresa]);
+
+    const cargarNombreMicroempresa = async (id) => {
+        try {
+            const res = await getMicroempresaById(id);
+            setNombreMicroempresa(res.data.nombre || 'Nuestra Tienda');
+        } catch {
+            setNombreMicroempresa('Nuestra Tienda');
+        }
+    };
 
     const cargarDatos = async (id) => {
         try {
@@ -84,7 +98,7 @@ export default function Portal() {
             <header className="site-header">
                 {/* Logo */}
                 <div className="brand-logo">
-                    NUESTRA TIENDA
+                    {nombreMicroempresa || 'Nuestra Tienda'}
                     <span className="trademark">®</span>
                 </div>
 
