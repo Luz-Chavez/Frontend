@@ -1,169 +1,304 @@
+/* ============================================
+   PORTAL STYLES - Diseño Profesional Premium
+   ============================================ */
+
+/* Variables de Diseño */
+:root {
+    --portal-primary: #0A3A40;
+    --portal-secondary: #1D7373;
+    --portal-accent: #FF6B35;
+    --portal-bg: #F8FAFC;
+    --portal-card-bg: #FFFFFF;
+    --portal-text: #1E293B;
+    --portal-text-light: #64748B;
+    --portal-border: #E2E8F0;
+    --portal-shadow: 0 4px 20px rgba(10, 58, 64, 0.08);
+    --portal-shadow-hover: 0 12px 40px rgba(10, 58, 64, 0.15);
+    --portal-gradient: linear-gradient(135deg, #0A3A40 0%, #1D7373 100%);
+    --portal-glass: rgba(255, 255, 255, 0.85);
+}
+
 /* Fuente y Reset */
 .portal-wrapper {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-color: #fff;
-    color: #333;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--portal-bg);
+    color: var(--portal-text);
     min-height: 100vh;
 }
 
-/* --- HEADER SUPERIOR --- */
-.site-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 25px 50px;
-    background: #fff;
-}
-
-/* Navegación Izquierda */
-.top-nav-links {
-    display: flex;
-    gap: 25px;
-    flex: 1;
-}
-
-.nav-link {
-    text-decoration: none;
-    color: #555;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+/* ============================================
+   HERO BANNER - Impacto Visual Inicial
+   ============================================ */
+.hero-banner {
     position: relative;
-    padding-bottom: 5px;
+    height: 400px;
+    background: var(--portal-gradient);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.nav-link:hover, .nav-link.active-section {
-    color: #000;
+.hero-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.4;
 }
 
-.nav-link.active-section::after {
+.hero-banner::after {
     content: '';
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: #cc0000; /* Rojo activo */
+    right: 0;
+    height: 120px;
+    background: linear-gradient(to top, var(--portal-bg), transparent);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: white;
+    padding: 0 20px;
+}
+
+.hero-content h1 {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    text-shadow: 0 4px 30px rgba(0,0,0,0.3);
+}
+
+.hero-content p {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    max-width: 500px;
+    margin: 0 auto;
+    font-weight: 300;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.hero-badge::before {
+    content: '✨';
+}
+
+/* ============================================
+   HEADER SUPERIOR - Navegación Principal
+   ============================================ */
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: var(--portal-glass);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--portal-border);
+    box-shadow: 0 1px 12px rgba(0,0,0,0.04);
 }
 
 /* Logo Central */
 .brand-logo {
-    font-size: 38px;
-    font-weight: bold;
-    color: #cc0000;
-    font-style: italic;
-    letter-spacing: -1px;
-    flex: 1;
-    text-align: center;
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--portal-primary);
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
+
+.brand-logo::before {
+    content: '';
+    width: 32px;
+    height: 32px;
+    background: var(--portal-gradient);
+    border-radius: 10px;
+    display: inline-block;
+}
+
 .trademark {
-    font-size: 12px;
-    vertical-align: top;
-    font-style: normal;
+    font-size: 10px;
+    vertical-align: super;
+    opacity: 0.5;
+    font-weight: normal;
 }
 
 /* Iconos Derecha */
 .header-icons {
     display: flex;
-    gap: 25px;
-    flex: 1;
-    justify-content: flex-end;
+    gap: 8px;
 }
 
 .icon-btn {
-    background: none;
+    background: transparent;
     border: none;
     cursor: pointer;
-    color: #333;
-    padding: 0;
+    color: var(--portal-text-light);
+    padding: 12px;
     display: flex;
     align-items: center;
-    transition: color 0.2s;
+    justify-content: center;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    position: relative;
 }
 
 .icon-btn:hover {
-    color: #cc0000;
+    background: var(--portal-primary);
+    color: white;
+    transform: translateY(-2px);
 }
 
-/* --- BARRA DE HERRAMIENTAS (TOOLBAR) --- */
+/* ============================================
+   BARRA DE HERRAMIENTAS
+   ============================================ */
 .toolbar-container {
-    border-top: 1px solid #e0e0e0;
-    border-bottom: 1px solid #e0e0e0;
-    padding: 15px 50px;
+    padding: 20px 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: white;
+    border-bottom: 1px solid var(--portal-border);
+    gap: 20px;
 }
 
 .btn-ocultar-filtros {
-    background: none;
-    border: 1px solid #ddd;
-    padding: 8px 15px;
-    font-size: 12px;
+    background: var(--portal-bg);
+    border: 1px solid var(--portal-border);
+    padding: 12px 20px;
+    font-size: 0.875rem;
     font-weight: 600;
-    text-transform: uppercase;
     cursor: pointer;
     display: flex;
     align-items: center;
+    gap: 8px;
+    border-radius: 12px;
+    color: var(--portal-text);
+    transition: all 0.2s ease;
+}
+
+.btn-ocultar-filtros:hover {
+    background: var(--portal-primary);
+    color: white;
+    border-color: var(--portal-primary);
 }
 
 .toolbar-center {
     flex: 1;
-    margin: 0 40px;
+    max-width: 400px;
 }
 
 .search-bar-wrapper {
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 5px;
+    background: var(--portal-bg);
+    border: 2px solid transparent;
+    border-radius: 14px;
+    padding: 12px 20px;
+    transition: all 0.2s ease;
+}
+
+.search-bar-wrapper:focus-within {
+    border-color: var(--portal-secondary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(29, 115, 115, 0.1);
 }
 
 .search-label {
-    font-size: 13px;
-    color: #777;
-    margin-right: 10px;
+    display: none;
 }
 
 .toolbar-search-input {
     border: none;
     outline: none;
-    font-size: 14px;
+    font-size: 0.9rem;
     width: 100%;
-    color: #333;
+    color: var(--portal-text);
+    background: transparent;
+    font-weight: 500;
 }
-.toolbar-search-input::placeholder { color: #ccc; }
+
+.toolbar-search-input::placeholder { 
+    color: var(--portal-text-light);
+}
 
 .toolbar-right {
-    font-size: 12px;
-    color: #666;
-    text-transform: uppercase;
+    font-size: 0.875rem;
+    color: var(--portal-text-light);
+    font-weight: 600;
+    background: var(--portal-bg);
+    padding: 10px 16px;
+    border-radius: 10px;
 }
 
-/* --- LAYOUT PRINCIPAL --- */
+/* ============================================
+   LAYOUT PRINCIPAL
+   ============================================ */
 .main-content-layout {
     display: flex;
-    padding: 40px 50px;
+    padding: 40px;
     gap: 40px;
+    max-width: 1600px;
+    margin: 0 auto;
 }
 
-/* Sidebar */
+/* ============================================
+   SIDEBAR DE CATEGORÍAS - Diseño Moderno
+   ============================================ */
 .sidebar {
-    width: 220px;
+    width: 260px;
     flex-shrink: 0;
+    position: sticky;
+    top: 100px;
+    height: fit-content;
 }
 
 .sidebar-section {
-    margin-bottom: 30px;
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: var(--portal-shadow);
+    border: 1px solid var(--portal-border);
 }
 
 .sidebar-title {
-    font-size: 13px;
+    font-size: 0.75rem;
     font-weight: 700;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     text-transform: uppercase;
-    color: #222;
+    letter-spacing: 0.1em;
+    color: var(--portal-text-light);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar-title::before {
+    content: '';
+    width: 4px;
+    height: 16px;
+    background: var(--portal-gradient);
+    border-radius: 4px;
 }
 
 .sidebar-list {
@@ -173,91 +308,237 @@
 }
 
 .sidebar-item {
-    font-size: 14px;
-    color: #666;
-    padding: 6px 0;
+    font-size: 0.95rem;
+    color: var(--portal-text);
+    padding: 14px 16px;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: all 0.2s ease;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.sidebar-item:hover { color: #000; }
-.sidebar-item.active { font-weight: 700; color: #000; }
+.sidebar-item::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--portal-border);
+    transition: all 0.2s ease;
+}
 
-/* Grid de Productos */
+.sidebar-item:hover { 
+    background: var(--portal-bg);
+    color: var(--portal-primary);
+}
+
+.sidebar-item:hover::before {
+    background: var(--portal-secondary);
+}
+
+.sidebar-item.active { 
+    background: var(--portal-primary);
+    color: white;
+    font-weight: 600;
+}
+
+.sidebar-item.active::before {
+    background: white;
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+/* ============================================
+   GRID DE PRODUCTOS - Tarjetas Premium
+   ============================================ */
 .product-grid-container {
     flex: 1;
 }
 
 .grid-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
 }
 
-/* Tarjeta Producto */
+.loading-text {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--portal-text-light);
+    font-size: 1.125rem;
+}
+
+.no-results {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--portal-text-light);
+    font-size: 1.125rem;
+    background: white;
+    border-radius: 24px;
+    border: 2px dashed var(--portal-border);
+}
+
+/* ============================================
+   TARJETA PRODUCTO (Override para más estilo)
+   ============================================ */
 .product-card {
     cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
 }
 
 .card-image {
     width: 100%;
-    height: 380px; /* Altura generosa como en la imagen */
-    background: #f9f9f9;
-    margin-bottom: 15px;
+    height: 320px;
+    background: linear-gradient(145deg, #f0f4f8 0%, #e2e8f0 100%);
+    border-radius: 20px;
+    margin-bottom: 16px;
     overflow: hidden;
+    position: relative;
+}
+
+.card-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 60%, rgba(10, 58, 64, 0.4));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+
+.product-card:hover .card-image::before {
+    opacity: 1;
 }
 
 .card-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s ease;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .product-card:hover .card-image img {
-    transform: scale(1.03);
+    transform: scale(1.08);
 }
 
 .card-info {
-    text-align: left;
+    padding: 0 8px;
 }
 
 .card-title {
-    font-size: 13px;
+    font-size: 1rem;
     font-weight: 700;
-    text-transform: uppercase;
-    margin: 0 0 5px 0;
-    color: #111;
+    margin: 0 0 6px 0;
+    color: var(--portal-text);
+    line-height: 1.4;
 }
 
 .card-price {
-    font-size: 15px;
-    color: #333;
-    margin: 0 0 10px 0;
+    font-size: 1.25rem;
+    color: var(--portal-primary);
+    font-weight: 800;
+    margin: 0;
 }
 
-/* Opciones visuales (Colores y Tallas) */
-.card-options {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+/* ============================================
+   ANIMACIONES GLOBALES
+   ============================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.color-dots {
-    display: flex;
-    gap: 5px;
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }
 
-.dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 1px solid #ddd;
+.animate-fade-in {
+    animation: fadeInUp 0.5s ease forwards;
 }
-.dot.black { background-color: #000; }
-.dot.navy { background-color: #000080; }
 
-.sizes-text {
-    font-size: 11px;
-    color: #888;
+/* Scrollbar Personalizado */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--portal-bg);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--portal-border);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--portal-secondary);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+    .main-content-layout {
+        flex-direction: column;
+        padding: 20px;
+    }
+    
+    .sidebar {
+        width: 100%;
+        position: relative;
+        top: 0;
+    }
+    
+    .sidebar-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .sidebar-item {
+        padding: 10px 16px;
+        margin: 0;
+    }
+    
+    .hero-banner {
+        height: 300px;
+    }
+}
+
+@media (max-width: 640px) {
+    .site-header {
+        padding: 16px 20px;
+    }
+    
+    .toolbar-container {
+        flex-wrap: wrap;
+        padding: 16px 20px;
+    }
+    
+    .brand-logo {
+        font-size: 1.25rem;
+    }
+    
+    .grid-layout {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+    
+    .card-image {
+        height: 200px;
+    }
 }

@@ -1,10 +1,16 @@
 import React from "react";
 import { useCart } from "../../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
 
-// Iconos SVG simples
-const IconX = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>;
-const IconTrash = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>;
+// Icono SVG para carrito vacío (reemplaza emoji)
+const IconEmptyCart = () => (
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="9" cy="21" r="1" />
+    <circle cx="20" cy="21" r="1" />
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+  </svg>
+);
 
 export default function CartDrawer({ isOpen, onClose, idMicroempresa }) {
   const { cart, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
@@ -12,104 +18,359 @@ export default function CartDrawer({ isOpen, onClose, idMicroempresa }) {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex justify-end">
-      {/* Fondo oscuro (Overlay) */}
-      <div 
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity" 
-        onClick={onClose}
-      ></div>
+  const styles = {
+    overlay: {
+      position: 'fixed',
+      inset: 0,
+      zIndex: 9999,
+      display: 'flex',
+      justifyContent: 'flex-end'
+    },
+    backdrop: {
+      position: 'absolute',
+      inset: 0,
+      background: 'rgba(10, 58, 64, 0.4)',
+      backdropFilter: 'blur(4px)',
+      transition: 'opacity 0.3s ease'
+    },
+    panel: {
+      position: 'relative',
+      width: '100%',
+      maxWidth: '440px',
+      background: 'white',
+      height: '100%',
+      boxShadow: '-20px 0 60px rgba(0, 0, 0, 0.15)',
+      display: 'flex',
+      flexDirection: 'column',
+      animation: 'slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+    },
+    header: {
+      padding: '24px 28px',
+      borderBottom: '1px solid #E2E8F0',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      background: 'linear-gradient(135deg, #0A3A40 0%, #1D7373 100%)',
+      color: 'white'
+    },
+    headerTitle: {
+      fontSize: '1.25rem',
+      fontWeight: '700',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px'
+    },
+    closeBtn: {
+      background: 'rgba(255,255,255,0.15)',
+      border: 'none',
+      padding: '10px',
+      borderRadius: '12px',
+      cursor: 'pointer',
+      color: 'white',
+      transition: 'all 0.2s ease'
+    },
+    itemsContainer: {
+      flex: 1,
+      overflowY: 'auto',
+      padding: '20px',
+      background: '#F8FAFC'
+    },
+    emptyState: {
+      textAlign: 'center',
+      padding: '60px 20px',
+      color: '#94A3B8'
+    },
+    itemCard: {
+      display: 'flex',
+      gap: '16px',
+      padding: '16px',
+      background: 'white',
+      borderRadius: '16px',
+      marginBottom: '12px',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+      border: '1px solid #E2E8F0',
+      transition: 'all 0.2s ease'
+    },
+    itemImage: {
+      width: '80px',
+      height: '80px',
+      borderRadius: '12px',
+      overflow: 'hidden',
+      background: 'linear-gradient(145deg, #f0f4f8 0%, #e2e8f0 100%)',
+      flexShrink: 0
+    },
+    itemInfo: {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between'
+    },
+    itemName: {
+      fontSize: '0.95rem',
+      fontWeight: '600',
+      color: '#1E293B',
+      marginBottom: '4px',
+      lineHeight: '1.3'
+    },
+    itemPrice: {
+      fontSize: '1.1rem',
+      fontWeight: '700',
+      color: '#1D7373'
+    },
+    quantityControls: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      marginTop: '12px'
+    },
+    quantityBtn: {
+      width: '32px',
+      height: '32px',
+      borderRadius: '10px',
+      border: 'none',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'all 0.2s ease'
+    },
+    minusBtn: {
+      background: '#F1F5F9',
+      color: '#64748B'
+    },
+    plusBtn: {
+      background: '#0A3A40',
+      color: 'white'
+    },
+    quantity: {
+      fontSize: '1rem',
+      fontWeight: '600',
+      minWidth: '28px',
+      textAlign: 'center',
+      color: '#1E293B'
+    },
+    deleteBtn: {
+      background: 'none',
+      border: 'none',
+      color: '#CBD5E1',
+      cursor: 'pointer',
+      padding: '8px',
+      borderRadius: '8px',
+      transition: 'all 0.2s ease',
+      alignSelf: 'flex-start'
+    },
+    footer: {
+      padding: '24px',
+      borderTop: '1px solid #E2E8F0',
+      background: 'white'
+    },
+    totalRow: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: '20px'
+    },
+    totalLabel: {
+      color: '#64748B',
+      fontWeight: '500',
+      fontSize: '0.95rem'
+    },
+    totalAmount: {
+      fontSize: '1.75rem',
+      fontWeight: '800',
+      color: '#0A3A40'
+    },
+    checkoutBtn: {
+      width: '100%',
+      background: 'linear-gradient(135deg, #0A3A40 0%, #1D7373 100%)',
+      color: 'white',
+      border: 'none',
+      padding: '18px 24px',
+      borderRadius: '16px',
+      fontSize: '1rem',
+      fontWeight: '700',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '10px',
+      boxShadow: '0 10px 30px rgba(10, 58, 64, 0.25)',
+      transition: 'all 0.3s ease'
+    },
+    clearBtn: {
+      width: '100%',
+      background: 'none',
+      border: 'none',
+      color: '#94A3B8',
+      padding: '12px',
+      marginTop: '10px',
+      fontSize: '0.875rem',
+      cursor: 'pointer',
+      transition: 'color 0.2s ease'
+    },
+    badge: {
+      background: 'rgba(255,255,255,0.2)',
+      padding: '4px 10px',
+      borderRadius: '20px',
+      fontSize: '0.8rem',
+      fontWeight: '600'
+    }
+  };
 
-      {/* Panel Blanco */}
-      <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-slide-in-right">
-        
-        {/* Cabecera */}
-        <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-[#F8FAFC]">
-          <h2 className="text-xl font-bold text-[#0A3A40]">Tu Carrito</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full text-gray-500">
-            <IconX />
+  return (
+    <div style={styles.overlay}>
+      {/* Backdrop */}
+      <div style={styles.backdrop} onClick={onClose}></div>
+
+      {/* Panel Principal */}
+      <div style={styles.panel}>
+
+        {/* Header con gradiente */}
+        <div style={styles.header}>
+          <h2 style={styles.headerTitle}>
+            <ShoppingBag size={24} />
+            Tu Carrito
+            {cart.length > 0 && (
+              <span style={styles.badge}>{cart.length}</span>
+            )}
+          </h2>
+          <button
+            onClick={onClose}
+            style={styles.closeBtn}
+            onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.25)'}
+            onMouseLeave={(e) => e.target.style.background = 'rgba(255,255,255,0.15)'}
+          >
+            <X size={22} />
           </button>
         </div>
 
-        {/* Lista de Productos */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        {/* Lista de Items */}
+        <div style={styles.itemsContainer}>
           {cart.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">
-              <p className="text-4xl mb-2">🛒</p>
-              <p>Tu carrito está vacío</p>
+            <div style={styles.emptyState}>
+              <IconEmptyCart />
+              <p style={{ fontSize: '1.1rem', fontWeight: '500', marginTop: '16px' }}>Tu carrito está vacío</p>
+              <p style={{ fontSize: '0.875rem', marginTop: '8px' }}>
+                Explora nuestros productos y encuentra algo que te guste
+              </p>
             </div>
           ) : (
             cart.map((item) => (
-              <div key={item.id_producto} className="flex gap-4 p-3 bg-white border border-gray-100 rounded-xl shadow-sm">
+              <div
+                key={item.id_producto}
+                style={styles.itemCard}
+              >
                 {/* Imagen */}
-                <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                <div style={styles.itemImage}>
                   {item.imagen ? (
-                    <img src={`http://localhost:8000${item.imagen}`} alt={item.nombre} className="w-full h-full object-cover" />
+                    <img
+                      src={`http://localhost:8000${item.imagen}`}
+                      alt={item.nombre}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">Sin Foto</div>
+                    <div style={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#CBD5E1',
+                      fontSize: '0.75rem'
+                    }}>
+                      Sin Foto
+                    </div>
                   )}
                 </div>
 
                 {/* Info */}
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-800 line-clamp-1">{item.nombre}</h3>
-                  <p className="text-[#1D7373] font-bold text-sm">Bs. {item.precio_venta.toFixed(2)}</p>
-                  
-                  {/* Controles Cantidad */}
-                  <div className="flex items-center gap-3 mt-2">
-                    <button 
+                <div style={styles.itemInfo}>
+                  <div>
+                    <h3 style={styles.itemName}>{item.nombre}</h3>
+                    <p style={styles.itemPrice}>
+                      Bs. {(item.precio_venta || 0).toFixed(2)}
+                    </p>
+                  </div>
+
+                  {/* Controles de cantidad */}
+                  <div style={styles.quantityControls}>
+                    <button
                       onClick={() => updateQuantity(item.id_producto, item.cantidad - 1)}
-                      className="w-6 h-6 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 text-gray-600 font-bold"
-                    > - </button>
-                    <span className="text-sm font-medium w-4 text-center">{item.cantidad}</span>
-                    <button 
+                      style={{ ...styles.quantityBtn, ...styles.minusBtn }}
+                    >
+                      <Minus size={16} />
+                    </button>
+
+                    <span style={styles.quantity}>{item.cantidad}</span>
+
+                    <button
                       onClick={() => updateQuantity(item.id_producto, item.cantidad + 1)}
-                      className="w-6 h-6 flex items-center justify-center bg-[#0A3A40] text-white rounded-full hover:bg-[#155d5d] font-bold"
-                    > + </button>
+                      style={{ ...styles.quantityBtn, ...styles.plusBtn }}
+                    >
+                      <Plus size={16} />
+                    </button>
                   </div>
                 </div>
 
-                {/* Eliminar */}
-                {/* Botón de Eliminar en CartDrawer.jsx */}
-                <button 
-                    onClick={() => removeFromCart(item.id_producto)}
-                    className="text-gray-300 hover:text-red-500 self-start p-1"
-                    title="Eliminar del carrito"
+                {/* Botón eliminar */}
+                <button
+                  onClick={() => removeFromCart(item.id_producto)}
+                  style={styles.deleteBtn}
+                  onMouseEnter={(e) => e.target.style.color = '#EF4444'}
+                  onMouseLeave={(e) => e.target.style.color = '#CBD5E1'}
+                  title="Eliminar producto"
                 >
-                    <Trash2 size={18} /> {/* O tu icono SVG */}
+                  <Trash2 size={20} />
                 </button>
               </div>
             ))
           )}
         </div>
 
-        {/* Footer (Total y Botón) */}
+        {/* Footer con Total y Botones */}
         {cart.length > 0 && (
-          <div className="p-5 border-t border-gray-100 bg-white">
-            <div className="flex justify-between items-end mb-4">
-              <span className="text-gray-500 font-medium">Total Estimado</span>
-              <span className="text-2xl font-bold text-[#0A3A40]">Bs. {cartTotal.toFixed(2)}</span>
+          <div style={styles.footer}>
+            <div style={styles.totalRow}>
+              <span style={styles.totalLabel}>Total Estimado</span>
+              <span style={styles.totalAmount}>
+                Bs. {(cartTotal || 0).toFixed(2)}
+              </span>
             </div>
-            
+
             <button
               onClick={() => {
                 onClose();
                 navigate(`/portal/${idMicroempresa}/checkout`);
               }}
-              className="w-full bg-[#0A3A40] hover:bg-[#062c30] text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-[#0A3A40]/20 transition-all"
+              style={styles.checkoutBtn}
             >
-              Procesar Compra →
+              Procesar Compra
+              <ArrowRight size={20} />
             </button>
-            
-            <button 
-              onClick={clearCart} 
-              className="w-full mt-2 text-sm text-gray-400 hover:text-red-500 py-2"
+
+            <button
+              onClick={clearCart}
+              style={styles.clearBtn}
             >
               Vaciar Carrito
             </button>
           </div>
         )}
       </div>
+
+      {/* Animación CSS */}
+      <style>{`
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `}</style>
     </div>
   );
 }

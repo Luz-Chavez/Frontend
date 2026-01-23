@@ -45,11 +45,13 @@ function ProductCreateCard({ categorias = [], onProductoCreado, onClose }) {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (validate()) {
-      // Handler real de creación aquí
-      onProductoCreado && onProductoCreado(form);
-      onClose && onClose();
+      // El padre (Productos.jsx) maneja el cierre del modal después de crear exitosamente
+      // No llamamos onClose aquí para permitir que se abra el modal de stock
+      if (onProductoCreado) {
+        await onProductoCreado(form);
+      }
     }
   };
 
