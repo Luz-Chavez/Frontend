@@ -1,10 +1,25 @@
 import { useAuth } from "../../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, CreditCard, User, Building2, ShieldCheck, LogOut, Box, Tags, ShoppingBag } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  Users, 
+  CreditCard, 
+  User, 
+  Building2, 
+  ShieldCheck, 
+  LogOut, 
+  Box, 
+  Tags, 
+  ShoppingBag, 
+  Truck,          // Icono para Proveedores
+  ShoppingCart,   // Icono para Compras
+  BarChart3       // Icono para Reportes
+} from "lucide-react";
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  
   // Los logs deben ir después de inicializar location
   console.log("[Sidebar] user:", user);
   console.log("[Sidebar] location:", location.pathname);
@@ -14,7 +29,7 @@ const Sidebar = () => {
     logoArea: { padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.1)' },
     logoTitle: { fontSize: '18px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' },
     subtitle: { fontSize: '12px', color: '#9CA3AF', marginTop: '4px' },
-    nav: { flex: 1, padding: '20px 10px' },
+    nav: { flex: 1, padding: '20px 10px', overflowY: 'auto' }, // Added overflowY for smaller screens if menu grows
     link: { display: 'flex', alignItems: 'center', padding: '12px 16px', color: '#D1D5DB', textDecoration: 'none', borderRadius: '8px', marginBottom: '4px', transition: 'all 0.2s' },
     activeLink: { backgroundColor: '#10B981', color: 'white', fontWeight: '500' },
     footer: { padding: '20px', borderTop: '1px solid rgba(255,255,255,0.1)' },
@@ -35,15 +50,25 @@ const Sidebar = () => {
       { icon: LayoutDashboard, text: "Dashboard", path: "/dashboard" },
       { icon: User, text: "Mi Perfil", path: "/dashboard/profile" },
       { icon: Building2, text: "Editar Empresa", path: "/dashboard/company-edit" },
+      
+      // Gestión de Personal
       { icon: ShieldCheck, text: "Admins de la Empresa", path: "/dashboard/admins" },
       { icon: Users, text: "Vendedores", path: "/dashboard/vendedores" },
+      
+      // Gestión Comercial
       { icon: Users, text: "Clientes", path: "/dashboard/clientes" },
-
       { icon: ShoppingBag, text: "Ventas / Pedidos", path: "/dashboard/ventas" },
 
-      // Asegurarse que la ruta de productos es la de adminmicroempresa
+      // --- NUEVOS MÓDULOS ---
+      { icon: Truck, text: "Proveedores", path: "/dashboard/proveedores" },
+      { icon: ShoppingCart, text: "Compras", path: "/dashboard/compras" },
+      
+      // Inventario
       { icon: Box, text: "Productos", path: "/dashboard/productos" },
       { icon: Tags, text: "Categorías", path: "/dashboard/categorias" },
+      
+      // Finanzas y Reportes
+      { icon: BarChart3, text: "Reportes", path: "/dashboard/reportes" },
       { icon: CreditCard, text: "Suscripción", path: "/dashboard/subscription" },
     ],
     vendedor: [
@@ -92,7 +117,6 @@ const Sidebar = () => {
             ...(location.pathname === "/notificaciones" ? styles.activeLink : {})
           }}
         >
-          {/* Campana de lucide-react, si no está importada, usar <span>🔔</span> */}
           <svg style={{ marginRight: 12 }} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F5F7F8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           Notificaciones
         </Link>
