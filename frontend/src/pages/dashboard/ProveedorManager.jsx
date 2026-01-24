@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { 
     getMetodosPago, createMetodoPago, toggleMetodoPago,
-    getProductosProveedor, asociarProducto, toggleProductoProveedor, getProductosGlobales
+    getProductosProveedor, asociarProducto, toggleProductoProveedor, getProductosGlobales,
+    getProductosNoActivos
 } from '../../api/proveedores.api';
 import { X, CreditCard, Package, Plus, CheckCircle, Ban, Trash2 } from 'lucide-react';
 
@@ -40,16 +41,23 @@ export default function ProveedorManager({ proveedor, idMicroempresa, onClose })
 }
 
 // --- SUB-COMPONENTE: MÉTODOS DE PAGO ---
+import { getMetodosPagoNoActivos } from '../../api/proveedores.api';
+
 function MetodosPagoManager({ proveedor, idMicro }) {
     const [metodos, setMetodos] = useState([]);
+    const [noActivos, setNoActivos] = useState([]);
     const [form, setForm] = useState({ tipo: 'EFECTIVO', descripcion: '', datos_pago: '' });
     const [showForm, setShowForm] = useState(false);
 
     useEffect(() => { loadData(); }, []);
 
     const loadData = async () => {
-        const res = await getMetodosPago(proveedor.id_proveedor, idMicro);
+        const [res, noActivosRes] = await Promise.all([
+            getMetodosPago(proveedor.id_proveedor, idMicro),
+            getMetodosPagoNoActivos(proveedor.id_proveedor, idMicro)
+        ]);
         setMetodos(res.data);
+        setNoActivos(noActivosRes.data);
     };
 
     const handleCreate = async (e) => {
@@ -102,7 +110,6 @@ function MetodosPagoManager({ proveedor, idMicro }) {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {metodos.length === 0 ? <p style={{color: '#666', fontStyle: 'italic'}}>No hay métodos registrados.</p> : null}
-                
                 {metodos.map(m => (
                     <div key={m.id_metodo_pago} style={{ ...cardItemStyle, opacity: m.activo ? 1 : 0.6 }}>
                         <div style={{flex: 1}}>
@@ -110,7 +117,6 @@ function MetodosPagoManager({ proveedor, idMicro }) {
                                 <span style={{ fontWeight: 'bold', color: '#1D7373', fontSize: 14 }}>{m.tipo}</span>
                                 {m.descripcion && <span style={{ fontSize: 14, color: '#333' }}>| {m.descripcion}</span>}
                             </div>
-                            {/* CORRECCIÓN DE COLOR AQUÍ 👇 */}
                             <div style={{ fontSize: 13, color: '#4B5563', background: '#F3F4F6', padding: '4px 8px', borderRadius: 4, display: 'inline-block' }}>
                                 {m.datos_pago || "Sin datos adicionales"}
                             </div>
@@ -121,6 +127,39 @@ function MetodosPagoManager({ proveedor, idMicro }) {
                     </div>
                 ))}
             </div>
+
+            {/* Métodos de Pago No Activos */}
+            <div style={{ marginTop: 30 }}>
+                <h5 style={{ margin: '0 0 10px 0', color: '#B91C1C', fontSize: 15, fontWeight: 700 }}>Métodos de Pago No Activos</h5>
+                {noActivos.length === 0 ? (
+                    <p style={{ color: '#666', fontStyle: 'italic', marginLeft: 8 }}>No hay métodos de pago no activos.</p>
+                ) : (
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14, background: '#FEF2F2', borderRadius: 8 }}>
+                        <thead>
+                            <tr>
+                                <th style={thStyle}>Tipo</th>
+                                <th style={thStyle}>Descripción</th>
+                                <th style={thStyle}>Datos</th>
+                                <th style={{...thStyle, textAlign: 'right'}}>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {noActivos.map(m => (
+                                <tr key={m.id_metodo_pago} style={{ borderBottom: '1px solid #FCA5A5' }}>
+                                    <td style={tdStyle}>{m.tipo}</td>
+                                    <td style={tdStyle}>{m.descripcion || '-'}</td>
+                                    <td style={tdStyle}>{m.datos_pago || 'Sin datos adicionales'}</td>
+                                    <td style={{...tdStyle, textAlign: 'right'}}>
+                                        <button onClick={() => handleToggle(m.id_metodo_pago, m.activo)} style={iconBtnStyle} title={m.activo ? "Desactivar" : "Activar"}>
+                                            {m.activo ? <CheckCircle size={18} color="#10B981" /> : <Ban size={18} color="#EF4444" />}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
         </div>
     );
 }
@@ -129,6 +168,7 @@ function MetodosPagoManager({ proveedor, idMicro }) {
 function ProductosManager({ proveedor, idMicro }) {
     const [productosProv, setProductosProv] = useState([]);
     const [globales, setGlobales] = useState([]);
+    const [noActivos, setNoActivos] = useState([]);
     const [form, setForm] = useState({ id_producto: '', precio_referencia: '' });
     const [showForm, setShowForm] = useState(false);
 
@@ -136,12 +176,14 @@ function ProductosManager({ proveedor, idMicro }) {
 
     const loadData = async () => {
         try {
-            const [misProds, allProds] = await Promise.all([
+            const [misProds, allProds, noActivosRes] = await Promise.all([
                 getProductosProveedor(proveedor.id_proveedor, idMicro),
-                getProductosGlobales(idMicro)
+                getProductosGlobales(idMicro),
+                getProductosNoActivos(proveedor.id_proveedor, idMicro)
             ]);
             setProductosProv(misProds.data);
             setGlobales(allProds.data);
+            setNoActivos(noActivosRes.data);
         } catch (e) { console.error(e); }
     };
 
@@ -213,6 +255,37 @@ function ProductosManager({ proveedor, idMicro }) {
                     ))}
                 </tbody>
             </table>
+
+            {/* Productos No Activos */}
+            <div style={{ marginTop: 30 }}>
+                <h5 style={{ margin: '0 0 10px 0', color: '#B91C1C', fontSize: 15, fontWeight: 700 }}>Productos No Activos</h5>
+                {noActivos.length === 0 ? (
+                    <p style={{ color: '#666', fontStyle: 'italic', marginLeft: 8 }}>No hay productos no activos.</p>
+                ) : (
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14, background: '#FEF2F2', borderRadius: 8 }}>
+                        <thead>
+                            <tr>
+                                <th style={thStyle}>Producto</th>
+                                <th style={thStyle}>Precio Ref.</th>
+                                <th style={{...thStyle, textAlign: 'right'}}>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {noActivos.map(p => (
+                                <tr key={p.id_producto} style={{ borderBottom: '1px solid #FCA5A5' }}>
+                                    <td style={tdStyle}>{p.producto ? p.producto.nombre : `ID: ${p.id_producto}`}</td>
+                                    <td style={tdStyle}>{p.precio_referencia} Bs</td>
+                                    <td style={{...tdStyle, textAlign: 'right'}}>
+                                        <button onClick={() => handleToggle(p.id_producto, p.activo)} style={iconBtnStyle} title={p.activo ? "Desactivar" : "Activar"}>
+                                            {p.activo ? <CheckCircle size={18} color="#10B981" /> : <Ban size={18} color="#EF4444" />}
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </div>
         </div>
     );
 }

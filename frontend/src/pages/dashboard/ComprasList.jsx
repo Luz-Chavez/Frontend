@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext'; // ✅ Importamos Auth
-import { getCompras } from '../../api/compras.api';
+import { getCompras, getCompraDetalles } from '../../api/compras.api';
+import { getProductosActivosPorMicroempresa } from '../../api/productos.api';
+import CompraDetalles from '../../components/CompraDetalles';
+import axios from '../../api/axios';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Calendar, User, Plus } from 'lucide-react';
 
 export default function ComprasList() {
-    const { user } = useAuth(); // ✅ Obtenemos el usuario
+    const { user } = useAuth();
     const [compras, setCompras] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [modal, setModal] = useState({ open: false, detalles: [], productos: {} });
+    const [loadingDetalles, setLoadingDetalles] = useState(false);
 
     useEffect(() => {
-        // Solo cargamos si existe la microempresa en el usuario
         if (user?.microempresa?.id_microempresa) {
             cargarHistorial(user.microempresa.id_microempresa);
         }
@@ -19,7 +23,6 @@ export default function ComprasList() {
     const cargarHistorial = async (idMicro) => {
         setLoading(true);
         try {
-            // Pasamos el ID al backend
             const res = await getCompras(idMicro);
             setCompras(res.data);
         } catch (err) {
@@ -29,9 +32,40 @@ export default function ComprasList() {
         }
     };
 
+    // Cargar detalles y nombres de productos
+    const verDetalles = async (id_compra) => {
+        setLoadingDetalles(true);
+        try {
+            // 1. Obtener detalles de la compra usando la API correcta
+            const resDetalles = await getCompraDetalles(id_compra);
+            // Soportar respuesta con detalles anidados o como array directo
+            let detalles = [];
+            if (Array.isArray(resDetalles.data)) {
+                detalles = resDetalles.data;
+            } else if (Array.isArray(resDetalles.data?.detalles)) {
+                detalles = resDetalles.data.detalles;
+            } else if (resDetalles.data?.data && Array.isArray(resDetalles.data.data)) {
+                detalles = resDetalles.data.data;
+            }
+            // 2. Obtener productos activos de la microempresa
+            let productos = {};
+            if (user?.microempresa?.id_microempresa) {
+                const resProds = await getProductosActivosPorMicroempresa(user.microempresa.id_microempresa);
+                productos = {};
+                (resProds.data || []).forEach(p => { productos[p.id_producto] = p; });
+            }
+            setModal({ open: true, detalles, productos });
+        } catch (e) {
+            alert('No se pudieron cargar los detalles de la compra');
+        } finally {
+            setLoadingDetalles(false);
+        }
+    };
+
+    const cerrarModal = () => setModal({ open: false, detalles: [], productos: {} });
+
     return (
         <div style={{ maxWidth: 1000, margin: "40px auto", background: "#fff", borderRadius: 16, boxShadow: "0 4px 16px #0002", padding: 32 }}>
-            
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                 <h2 style={{ color: "#1D7373", fontWeight: 700, fontSize: '24px', display: 'flex', alignItems: 'center', gap: 10, margin: 0 }}>
                     <ShoppingBag /> Historial de Compras
@@ -62,6 +96,7 @@ export default function ComprasList() {
                             <th style={thStyle}>Proveedor</th>
                             <th style={thStyle}>Total</th>
                             <th style={thStyle}>Estado</th>
+                            <th style={thStyle}></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -91,10 +126,32 @@ export default function ComprasList() {
                                         {c.estado}
                                     </span>
                                 </td>
+                                <td style={tdStyle}>
+                                    <button onClick={() => verDetalles(c.id_compra)} style={{
+                                        background: '#F3F4F6', color: '#1D7373', border: '1px solid #1D7373', borderRadius: 6,
+                                        padding: '6px 14px', fontWeight: 600, cursor: 'pointer', fontSize: 14
+                                    }}>
+                                        Ver Detalles
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
+            )}
+
+            {/* Modal de detalles */}
+            {modal.open && (
+                <div style={modalOverlayStyle}>
+                    <div style={modalBoxStyle}>
+                        <button onClick={cerrarModal} style={{ position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', fontSize: 22, color: '#1D7373', cursor: 'pointer' }}>×</button>
+                        {loadingDetalles ? (
+                            <div style={{ textAlign: 'center', color: '#1D7373', padding: 30 }}>Cargando detalles...</div>
+                        ) : (
+                            <CompraDetalles detalles={modal.detalles} productos={modal.productos} />
+                        )}
+                    </div>
+                </div>
             )}
         </div>
     );
@@ -103,3 +160,11 @@ export default function ComprasList() {
 // Estilos Reutilizados
 const thStyle = { padding: "12px 10px", textAlign: "left", color: "#042326", fontWeight: 700, fontSize: 16, borderBottom: "2px solid #1D7373" };
 const tdStyle = { padding: "12px 10px", fontSize: 15, color: "#0A3A40" };
+
+const modalOverlayStyle = {
+    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+    background: 'rgba(0,0,0,0.25)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center'
+};
+const modalBoxStyle = {
+    background: '#fff', borderRadius: 14, boxShadow: '0 8px 32px #0003', padding: 32, minWidth: 420, maxWidth: 600, position: 'relative'
+};
