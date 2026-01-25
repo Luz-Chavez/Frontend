@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { getVentasPorEmpresa, validarPagoVenta, rechazarPagoVenta } from "../../api/ventas.api";
+import { getVentasPorEmpresa, validarPagoVenta, rechazarPagoVenta, getDetallesVenta } from "../../api/ventas.api";
 import { getClientesPorMicroempresa } from "../../api/clientes.api";
 import { getProductosActivosPorMicroempresa } from "../../api/productos.api";
 import Swal from "sweetalert2";
-
+import VentaDetalles from '../../components/VentaDetalles';
+import VerDetallesCliente from '../../components/VerDetallesCliente';
+import { obtenerClientePorId } from '../../api/clientes.api';
 // === ICONOS SVG ===
 const IconCheck = ({ size = 16 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
@@ -72,15 +74,32 @@ const IconUser = ({ size = 16 }) => (
 export default function Ventas() {
   const { user } = useAuth();
   const [ventas, setVentas] = useState([]);
+
+  const [modal, setModal] = useState({ open: false, detalles: [], productos: {} });
+  const [loadingDetalles, setLoadingDetalles] = useState(false);
   const [clientes, setClientes] = useState({});
   const [productos, setProductos] = useState({});
   const [loading, setLoading] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState("TODOS");
 
+  // Estado para el modal de cliente
+  const [modalCliente, setModalCliente] = useState({ open: false, cliente: null, loading: false });
+
   const idMicroempresa =
     user?.microempresa?.id_microempresa ||
     user?.admin_microempresa?.id_microempresa ||
     user?.id_microempresa;
+  // Al hacer click en el nombre del cliente
+  const handleVerDetallesCliente = async (idCliente) => {
+    setModalCliente({ open: true, cliente: null, loading: true });
+    try {
+      const res = await obtenerClientePorId(idCliente);
+      setModalCliente({ open: true, cliente: res.data, loading: false });
+    } catch (e) {
+      setModalCliente({ open: true, cliente: null, loading: false });
+      alert('No se pudo cargar la información del cliente');
+    }
+  };
 
   useEffect(() => {
     if (idMicroempresa) {
@@ -129,6 +148,35 @@ export default function Ventas() {
       setLoading(false);
     }
   };
+
+  // Funciones para el modal de detalles de venta
+  const verDetallesVenta = async (idVenta) => {
+    setLoadingDetalles(true);
+    try {
+      // 1. Obtener detalles de la venta
+      const resDetalles = await getDetallesVenta(idVenta);
+      let detalles = [];
+      if (Array.isArray(resDetalles.data)) {
+        detalles = resDetalles.data;
+      } else if (Array.isArray(resDetalles.data?.detalles)) {
+        detalles = resDetalles.data.detalles;
+      } else if (resDetalles.data?.data && Array.isArray(resDetalles.data.data)) {
+        detalles = resDetalles.data.data;
+      }
+      // 2. Obtener productos activos de la microempresa
+      let productos = {};
+      if (idMicroempresa) {
+        const resProds = await getProductosActivosPorMicroempresa(idMicroempresa);
+        (resProds.data || []).forEach(p => { productos[p.id_producto] = p; });
+      }
+      setModal({ open: true, detalles, productos });
+    } catch (e) {
+      alert('No se pudieron cargar los detalles de la venta');
+    } finally {
+      setLoadingDetalles(false);
+    }
+  };
+  const cerrarModal = () => setModal({ open: false, detalles: [], productos: {} });
 
   const getClienteNombre = (idCliente) => {
     if (!idCliente) return "Cliente no registrado";
@@ -257,7 +305,6 @@ export default function Ventas() {
         <table style={styles.table}>
           <thead>
             <tr>
-              <th style={styles.th}>ID</th>
               <th style={styles.th}>Cliente</th>
               <th style={styles.th}>Productos</th>
               <th style={styles.th}>Fecha</th>
@@ -268,26 +315,46 @@ export default function Ventas() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="7" style={{ ...styles.td, textAlign: 'center', padding: '50px' }}><div style={{ color: '#64748B' }}>Cargando ventas...</div></td></tr>
+              <tr><td colSpan="6" style={{ ...styles.td, textAlign: 'center', padding: '50px' }}><div style={{ color: '#64748B' }}>Cargando ventas...</div></td></tr>
             ) : ventas.length === 0 ? (
-              <tr><td colSpan="7" style={styles.td}><div style={styles.emptyState}><IconClipboard size={40} style={{ color: '#CBD5E1', marginBottom: '12px' }} /><p style={{ color: '#64748B' }}>No se encontraron ventas</p></div></td></tr>
+              <tr><td colSpan="6" style={styles.td}><div style={styles.emptyState}><IconClipboard size={40} style={{ color: '#CBD5E1', marginBottom: '12px' }} /><p style={{ color: '#64748B' }}>No se encontraron ventas</p></div></td></tr>
             ) : (
               ventas.map((venta) => (
                 <tr key={venta.id_venta} style={{ transition: 'background 0.2s ease' }} onMouseEnter={(e) => e.currentTarget.style.background = '#FAFBFC'} onMouseLeave={(e) => e.currentTarget.style.background = 'white'}>
-                  <td style={{ ...styles.td, ...styles.idCell }}>#{venta.id_venta}</td>
                   <td style={styles.td}>
                     <div style={styles.clienteCell}>
                       <div style={{ width: '28px', height: '28px', background: '#E2E8F0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <IconUser size={14} />
                       </div>
-                      <span style={{ fontWeight: '600', color: '#1E293B' }}>{getClienteNombre(venta.id_cliente)}</span>
+                      <span
+                        style={{ fontWeight: '600', color: '#1E293B', cursor: 'pointer', textDecoration: 'underline' }}
+                        onClick={() => handleVerDetallesCliente(venta.id_cliente)}
+                        title="Ver detalles del cliente"
+                      >
+                        {getClienteNombre(venta.id_cliente)}
+                      </span>
                     </div>
                   </td>
-                  <td style={{ ...styles.td, color: '#64748B', fontSize: '0.85rem', maxWidth: '200px' }}>
-                    {venta.detalles && venta.detalles.length > 0
-                      ? venta.detalles.map((d, i) => <div key={i} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>• {getProductoNombre(d.id_producto)} (x{d.cantidad})</div>)
-                      : <span style={{ color: '#94A3B8' }}>Sin detalles</span>
-                    }
+                        {/* Modal de detalles de cliente */}
+                        {modalCliente.open && (
+                          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'transparent', zIndex: 1300, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(3px)', WebkitBackdropFilter: 'blur(3px)' }}>
+                            <div style={{ background: '#fff', borderRadius: 14, boxShadow: 'none', border: '1.5px solid #1D7373', padding: 32, minWidth: 350, maxWidth: 420, position: 'relative' }}>
+                              <button onClick={() => setModalCliente({ open: false, cliente: null, loading: false })} style={{ position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', fontSize: 22, color: '#1D7373', cursor: 'pointer' }}>×</button>
+                              {modalCliente.loading ? (
+                                <div style={{ textAlign: 'center', color: '#1D7373', padding: 30 }}>Cargando información del cliente...</div>
+                              ) : (
+                                <VerDetallesCliente cliente={modalCliente.cliente} onClose={() => setModalCliente({ open: false, cliente: null, loading: false })} />
+                              )}
+                            </div>
+                          </div>
+                        )}
+                  <td style={{ ...styles.td, color: '#64748B', fontSize: '0.85rem', maxWidth: '200px', textAlign: 'center' }}>
+                    <button onClick={() => verDetallesVenta(venta.id_venta)} style={{
+                      background: '#F3F4F6', color: '#1D7373', border: '1px solid #1D7373', borderRadius: 6,
+                      padding: '6px 14px', fontWeight: 600, cursor: 'pointer', fontSize: 14
+                    }}>
+                      Ver Detalles
+                    </button>
                   </td>
                   <td style={{ ...styles.td, color: '#64748B', fontSize: '0.85rem' }}>
                     {new Date(venta.fecha).toLocaleDateString('es-BO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -316,6 +383,19 @@ export default function Ventas() {
           </tbody>
         </table>
       </div>
+      {/* Modal de detalles de venta */}
+      {modal.open && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.25)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', borderRadius: 14, boxShadow: '0 8px 32px #0003', padding: 32, minWidth: 420, maxWidth: 600, position: 'relative' }}>
+            <button onClick={cerrarModal} style={{ position: 'absolute', top: 12, right: 16, background: 'none', border: 'none', fontSize: 22, color: '#1D7373', cursor: 'pointer' }}>×</button>
+            {loadingDetalles ? (
+              <div style={{ textAlign: 'center', color: '#1D7373', padding: 30 }}>Cargando detalles...</div>
+            ) : (
+              <VentaDetalles detalles={modal.detalles} productos={modal.productos} />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
