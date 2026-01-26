@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext'; // ✅ Importamos Auth
-import { getCompras, getCompraDetalles } from '../../api/compras.api';
+import { getCompras, getCompraDetalles, descargarCompraPDF } from '../../api/compras.api';
 import { getProductosActivosPorMicroempresa } from '../../api/productos.api';
 import CompraDetalles from '../../components/CompraDetalles';
 import axios from '../../api/axios';
@@ -64,6 +64,22 @@ export default function ComprasList() {
 
     const cerrarModal = () => setModal({ open: false, detalles: [], productos: {} });
 
+    // Descargar PDF de la compra
+    const handleDescargarPDF = async (id_compra) => {
+        try {
+            const res = await descargarCompraPDF(id_compra);
+            const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `compra_${id_compra}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (e) {
+            alert('No se pudo descargar el PDF de la compra.');
+        }
+    };
+
     return (
         <div style={{ maxWidth: 1000, margin: "40px auto", background: "#fff", borderRadius: 16, boxShadow: "0 4px 16px #0002", padding: 32 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -97,6 +113,7 @@ export default function ComprasList() {
                             <th style={thStyle}>Total</th>
                             <th style={thStyle}>Estado</th>
                             <th style={thStyle}></th>
+                            <th style={thStyle}>PDF</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -132,6 +149,14 @@ export default function ComprasList() {
                                         padding: '6px 14px', fontWeight: 600, cursor: 'pointer', fontSize: 14
                                     }}>
                                         Ver Detalles
+                                    </button>
+                                </td>
+                                <td style={tdStyle}>
+                                    <button onClick={() => handleDescargarPDF(c.id_compra)} style={{
+                                        background: '#10B981', color: '#fff', border: 'none', borderRadius: 6,
+                                        padding: '6px 14px', fontWeight: 600, cursor: 'pointer', fontSize: 14
+                                    }}>
+                                        Descargar PDF
                                     </button>
                                 </td>
                             </tr>

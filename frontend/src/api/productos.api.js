@@ -1,4 +1,7 @@
 import apiClient from '../services/apiClient';
+// Listar productos inactivos por microempresa
+export const getProductosInactivosPorMicroempresa = (id_microempresa) =>
+  apiClient.get(`/productos/microempresa/${id_microempresa}/inactivos`);
 
 // Activar producto (POST /productos/{id_producto}/activar)
 export const activarProducto = (id_producto) =>
@@ -11,10 +14,6 @@ export const desactivarProducto = (id_producto) =>
 // Listar productos activos por microempresa
 export const getProductosActivosPorMicroempresa = (id_microempresa) =>
   apiClient.get(`/productos/microempresa/${id_microempresa}/activos`);
-
-// Listar productos inactivos sin stock por microempresa
-export const getProductosInactivosSinStockPorMicroempresa = (id_microempresa) =>
-  apiClient.get(`/productos/microempresa/${id_microempresa}/inactivos-sin-stock`);
 
 // Obtener productos activos con stock para una microempresa (adminmicroempresa)
 export const getProductosActivosConStock = (id_microempresa) =>

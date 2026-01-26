@@ -1,5 +1,5 @@
 import { useAuth } from "../../context/AuthContext";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   LayoutDashboard, 
   Users, 
@@ -19,6 +19,7 @@ import {
 const Sidebar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Los logs deben ir después de inicializar location
   console.log("[Sidebar] user:", user);
@@ -82,6 +83,12 @@ const Sidebar = () => {
   // Protección contra error si user.rol no coincide
   const currentMenu = user && menus[user.rol] ? menus[user.rol] : [];
 
+  // Función para cerrar sesión y redirigir
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <div style={styles.sidebar}>
       <div style={styles.logoArea}>
@@ -136,7 +143,7 @@ const Sidebar = () => {
       </nav>
 
       <div style={styles.footer}>
-        <button onClick={logout} style={styles.logoutBtn}>
+        <button onClick={handleLogout} style={styles.logoutBtn}>
           <LogOut size={20} />
           Cerrar sesión
         </button>

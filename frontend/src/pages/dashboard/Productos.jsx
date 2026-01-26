@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getProductosActivosConStock, getProductosActivosPorMicroempresa, getProductosInactivosSinStockPorMicroempresa, crearProducto, actualizarProducto, eliminarProductoFisico, activarProducto, desactivarProducto, getProductosConStock, getProductosSinStockPorMicroempresa } from "../../api/productos.api";
+import { getProductosActivosConStock, getProductosActivosPorMicroempresa, getProductosInactivosPorMicroempresa, crearProducto, actualizarProducto, eliminarProductoFisico, activarProducto, desactivarProducto, getProductosConStock, getProductosSinStockPorMicroempresa } from "../../api/productos.api";
 import { getCategoriasByMicroempresa } from "../../api/categorias.api";
 import { useAuth } from "../../context/AuthContext";
 import ProductCard from "../../components/ProductCard";
@@ -56,33 +56,23 @@ function ProductosVista({
           if (filtroRapido === "todos") {
             res = await getProductosConStock(usuario.microempresa.id_microempresa);
           } else if (filtroRapido === "activos") {
-            // Mostrar productos activos por microempresa
+            // USAR RUTA CORRECTA: productos activos por microempresa
             res = await getProductosActivosPorMicroempresa(usuario.microempresa.id_microempresa);
-            if (!cancel && res) {
-              setProductos(res.data);
-              setLoading(false);
-            }
-            return;
           } else if (filtroRapido === "inactivos") {
-            res = await getProductosInactivosSinStockPorMicroempresa(usuario.microempresa.id_microempresa);
+            // USAR RUTA CORRECTA: productos inactivos por microempresa
+            res = await getProductosInactivosPorMicroempresa(usuario.microempresa.id_microempresa);
           } else if (filtroRapido === "stock0") {
-            // Mostrar todos los productos sin stock de la microempresa
             res = await getProductosSinStockPorMicroempresa(usuario.microempresa.id_microempresa);
-            if (!cancel && res) {
-              setProductos(res.data);
-              setLoading(false);
-            }
-            return;
           }
           if (!cancel && res) {
             setProductos(res.data);
-            setLoading(false);
           }
         } catch {
           if (!cancel) {
             setError("Error al cargar productos");
-            setLoading(false);
           }
+        } finally {
+          if (!cancel) setLoading(false);
         }
       }
     };
@@ -131,9 +121,12 @@ function ProductosVista({
     let match = true;
     if (categoriaId) match = match && prod.id_categoria === Number(categoriaId);
     if (nombreFiltro) match = match && prod.nombre.toLowerCase().includes(nombreFiltro.toLowerCase());
-    if (filtroRapido === "activos") match = match && prod.estado === "activo";
-    if (filtroRapido === "inactivos") match = match && prod.estado === "inactivo";
-    // No filtrar por stock 0 si ya viene filtrado desde backend
+    // No volver a filtrar por estado si ya se usó la ruta específica
+    // Solo filtrar por estado si filtroRapido es "todos" o "stock0"
+    if (filtroRapido === "todos" || filtroRapido === "stock0") {
+      if (filtroRapido === "activos") match = match && prod.estado === "activo";
+      if (filtroRapido === "inactivos") match = match && prod.estado === "inactivo";
+    }
     return match;
   });
 
@@ -275,7 +268,7 @@ function ProductosVista({
         } else if (filtroRapido === "activos") {
           res = await getProductosActivosPorMicroempresa(usuario.microempresa.id_microempresa);
         } else if (filtroRapido === "inactivos") {
-          res = await getProductosInactivosSinStockPorMicroempresa(usuario.microempresa.id_microempresa);
+          res = await getProductosInactivosPorMicroempresa(usuario.microempresa.id_microempresa);
         } else if (filtroRapido === "stock0") {
           res = await getProductosSinStockPorMicroempresa(usuario.microempresa.id_microempresa);
         }
