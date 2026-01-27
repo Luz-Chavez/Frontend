@@ -7,7 +7,7 @@ import CreateCategoryModal from "../../components/CreateCategoryModal";
 
 
 
-function CategoriasVista() {
+function CategoriasVista({ readOnly = false }) {
   const { user } = useAuth();
   const [categoriasEditadas, setCategoriasEditadas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +15,9 @@ function CategoriasVista() {
   const [modalEditar, setModalEditar] = useState(null);
   const [modalCrear, setModalCrear] = useState(false);
   const [error, setError] = useState("");
+
+  // Permisos - readOnly fuerza modo solo lectura
+  const puedeEditar = !readOnly && (user?.rol === "adminmicroempresa" || user?.rol === "superadmin");
 
 
   // Cargar categorías desde el backend
@@ -33,7 +36,8 @@ function CategoriasVista() {
         setLoading(false);
       }
     };
-    if (user?.rol === "adminmicroempresa") {
+    // También cargar para vendedores (solo lectura)
+    if (user?.rol === "adminmicroempresa" || user?.rol === "vendedor") {
       fetchCategorias();
     }
   }, [user]);
@@ -51,14 +55,14 @@ function CategoriasVista() {
 
   const handleGuardarEdicion = async catEditada => {
     try {
-        const body = {
-          nombre: catEditada.nombre,
-          activo: catEditada.activo
-        };
-        if (catEditada.descripcion && catEditada.descripcion.trim() !== "") {
-          body.descripcion = catEditada.descripcion.trim();
-        }
-        const res = await apiClient.put(`/productos/categoria/${catEditada.id_categoria}`, body);
+      const body = {
+        nombre: catEditada.nombre,
+        activo: catEditada.activo
+      };
+      if (catEditada.descripcion && catEditada.descripcion.trim() !== "") {
+        body.descripcion = catEditada.descripcion.trim();
+      }
+      const res = await apiClient.put(`/productos/categoria/${catEditada.id_categoria}`, body);
       setCategoriasEditadas(prev => prev.map(c => c.id_categoria === catEditada.id_categoria ? res.data : c));
       setModalEditar(null);
     } catch {
@@ -96,7 +100,7 @@ function CategoriasVista() {
   const handleCrear = async nuevaCat => {
     try {
       // Crear categoría: solo nombre y descripción
-      const body = { nombre: nuevaCat.nombre , descripcion: nuevaCat.descripcion };
+      const body = { nombre: nuevaCat.nombre, descripcion: nuevaCat.descripcion };
       console.log(body);
       if (nuevaCat.descripcion && nuevaCat.descripcion.trim() !== "") {
         body.descripcion = nuevaCat.descripcion;
@@ -179,7 +183,7 @@ function CategoriasVista() {
         >
           Inactivas
         </button>
-        {user?.rol === "adminmicroempresa" && (
+        {puedeEditar && (
           <button
             style={{ ...styles.filtroBtn, background: "#10B981", marginLeft: "auto" }}
             onClick={() => setModalCrear(true)}
@@ -202,9 +206,9 @@ function CategoriasVista() {
               <CategoryCard
                 key={cat.id_categoria}
                 categoria={cat}
-                onEdit={user?.rol === "adminmicroempresa" || user?.rol === "superadmin" ? () => handleEditar(cat) : undefined}
-                onToggle={user?.rol === "adminmicroempresa" || user?.rol === "superadmin" ? () => (cat.activo ? handleDesactivar(cat.id_categoria) : handleActivar(cat.id_categoria)) : undefined}
-                onDelete={user?.rol === "adminmicroempresa" || user?.rol === "superadmin" ? () => handleEliminar(cat.id_categoria) : undefined}
+                onEdit={puedeEditar ? () => handleEditar(cat) : undefined}
+                onToggle={puedeEditar ? () => (cat.activo ? handleDesactivar(cat.id_categoria) : handleActivar(cat.id_categoria)) : undefined}
+                onDelete={puedeEditar ? () => handleEliminar(cat.id_categoria) : undefined}
               />
             ))
           )}

@@ -1,235 +1,238 @@
-import React, { useState } from "react";
-import ProductCard from "../../components/ProductCard";
+import { useState, useEffect } from "react";
+import { getMicroempresas } from "../../api/microempresas.api";
+import { getProductosGlobal } from "../../api/superadmin.api";
+import apiClient from "../../services/apiClient";
 import ProductStockDetail from "../../components/ProductStockDetail";
 import ProductEditModal from "../../components/ProductEditModal";
-import mockCategorias from "./mockCategorias";
-
-// Mock de microempresas
-const mockEmpresas = [
-  { id: 1, nombre: "Microempresa A" },
-  { id: 2, nombre: "Microempresa B" },
-  { id: 3, nombre: "Microempresa C" }
-];
-
-// Mock de productos globales
-const mockProductosInicial = [
-  {
-    id_producto: 101,
-    nombre: "Agua Mineral",
-    descripcion: "Botella 500ml",
-    precio_venta: 12,
-    costo_compra: 8,
-    codigo: "AGUA500",
-    imagen: "",
-    estado: "activo",
-    id_categoria: 1,
-    id_microempresa: 1,
-    microempresa: "Microempresa A",
-    fecha_creacion: "2026-01-01",
-    stock: { id_producto: 101, cantidad: 20, stock_minimo: 5, id_stock: 1, ultima_actualizacion: "2026-01-15" }
-  },
-  {
-    id_producto: 102,
-    nombre: "Papas Fritas",
-    descripcion: "Bolsa 100g",
-    precio_venta: 15,
-    costo_compra: 10,
-    codigo: "PAPA100",
-    imagen: "",
-    estado: "inactivo",
-    id_categoria: 2,
-    id_microempresa: 2,
-    microempresa: "Microempresa B",
-    fecha_creacion: "2026-01-02",
-    stock: { id_producto: 102, cantidad: 0, stock_minimo: 3, id_stock: 2, ultima_actualizacion: "2026-01-16" }
-  },
-  {
-    id_producto: 103,
-    nombre: "Detergente",
-    descripcion: "1L",
-    precio_venta: 25,
-    costo_compra: 18,
-    codigo: "DETER1L",
-    imagen: "",
-    estado: "activo",
-    id_categoria: 3,
-    id_microempresa: 3,
-    microempresa: "Microempresa C",
-    fecha_creacion: "2026-01-03",
-    stock: { id_producto: 103, cantidad: 5, stock_minimo: 2, id_stock: 3, ultima_actualizacion: "2026-01-17" }
-  }
-];
 
 const palette = {
-  fondo: "#F5F7F8",
-  card: "#fff",
-  sombra: "0 2px 8px 0 rgba(10,58,64,0.10)",
-  verdeClaro: "#C6F6D5",
-  texto: "#042326",
-  info: "#1D7373",
-  alerta: "#E57373"
+  primary: '#0A3A40',
+  secondary: '#1D7373',
+  accent: '#107361',
+  white: '#FFFFFF',
+  lightBg: '#F8FAFC',
+  gray: '#64748B',
+  border: '#E2E8F0',
+  green: '#10B981',
+  red: '#EF4444',
 };
-
 
 function ProductosGlobalSuperadmin() {
   const [empresaFiltro, setEmpresaFiltro] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState("todos");
   const [nombreFiltro, setNombreFiltro] = useState("");
-  const [productos, setProductos] = useState(mockProductosInicial);
-  const [modalEditar, setModalEditar] = useState(null); // producto a editar o null
+  const [productos, setProductos] = useState([]);
+  const [microempresas, setMicroempresas] = useState([]);
+  const [mapaEmpresas, setMapaEmpresas] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [modalEditar, setModalEditar] = useState(null);
+  const [categorias, setCategorias] = useState([]);
 
-  // Filtrado funcional
+  // Cargar microempresas
+  useEffect(() => {
+    getMicroempresas()
+      .then(res => {
+        setMicroempresas(res.data);
+        const map = {};
+        res.data.forEach(e => { map[e.id_microempresa] = e.nombre; });
+        setMapaEmpresas(map);
+      })
+      .catch(() => setMicroempresas([]));
+  }, []);
+
+  // Cargar productos globales
+  useEffect(() => {
+    const fetchProductos = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await getProductosGlobal();
+        setProductos(res.data);
+      } catch (err) {
+        setError("Error al cargar productos: " + (err.response?.data?.detail || err.message));
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProductos();
+  }, []);
+
+  // Cargar categorías para el modal de edición
+  useEffect(() => {
+    apiClient.get('/productos/categorias/activas/global')
+      .then(res => setCategorias(res.data))
+      .catch(() => setCategorias([]));
+  }, []);
+
+  // Filtrado
   const productosFiltrados = productos.filter(p => {
     if (empresaFiltro && String(p.id_microempresa) !== String(empresaFiltro)) return false;
-    if (estadoFiltro === "activos" && p.estado !== "activo") return false;
-    if (estadoFiltro === "inactivos" && p.estado !== "inactivo") return false;
-    if (estadoFiltro === "stock0" && p.stock.cantidad > 0) return false;
+    if (estadoFiltro === "activos" && !p.estado) return false;
+    if (estadoFiltro === "inactivos" && p.estado) return false;
+    if (estadoFiltro === "stock0" && p.stock?.cantidad > 0) return false;
     if (nombreFiltro && !p.nombre.toLowerCase().includes(nombreFiltro.toLowerCase())) return false;
     return true;
   });
 
-  // Handlers reales
-  const handleEditar = producto => {
-    setModalEditar(producto);
+  // Handlers
+  const handleEditar = producto => setModalEditar(producto);
+
+  const handleGuardarEdicion = async prodEditado => {
+    try {
+      await apiClient.put(`/productos/${prodEditado.id_producto}`, {
+        nombre: prodEditado.nombre,
+        descripcion: prodEditado.descripcion,
+        precio_venta: prodEditado.precio_venta,
+        costo_compra: prodEditado.costo_compra,
+        codigo: prodEditado.codigo,
+        estado: prodEditado.estado,
+        id_categoria: prodEditado.id_categoria
+      });
+      // Recargar productos
+      const res = await getProductosGlobal();
+      setProductos(res.data);
+      setModalEditar(null);
+    } catch (err) {
+      alert("Error al guardar: " + (err.response?.data?.detail || err.message));
+    }
   };
-  const handleGuardarEdicion = prodEditado => {
-    setProductos(prev => prev.map(p => p.id_producto === prodEditado.id_producto ? { ...p, ...prodEditado } : p));
-    setModalEditar(null);
+
+  const handleToggleEstado = async (producto) => {
+    try {
+      if (producto.estado) {
+        await apiClient.put(`/productos/${producto.id_producto}/desactivar`);
+      } else {
+        await apiClient.put(`/productos/${producto.id_producto}/activar`);
+      }
+      const res = await getProductosGlobal();
+      setProductos(res.data);
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.detail || err.message));
+    }
   };
-  const handleActivar = id_producto => {
-    setProductos(prev => prev.map(p => p.id_producto === id_producto ? { ...p, estado: "activo" } : p));
+
+  const handleEliminar = async (id_producto) => {
+    if (!confirm("¿Eliminar este producto permanentemente?")) return;
+    try {
+      await apiClient.delete(`/productos/${id_producto}`);
+      const res = await getProductosGlobal();
+      setProductos(res.data);
+    } catch (err) {
+      alert("Error: " + (err.response?.data?.detail || err.message));
+    }
   };
-  const handleDesactivar = id_producto => {
-    setProductos(prev => prev.map(p => p.id_producto === id_producto ? { ...p, estado: "inactivo" } : p));
+
+  const s = {
+    container: { maxWidth: 1200, margin: "0 auto" },
+    title: { fontSize: 28, fontWeight: 700, color: palette.primary, marginBottom: 8 },
+    subtitle: { color: palette.gray, fontSize: 15, marginBottom: 24 },
+    filters: { display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 24, alignItems: 'center' },
+    select: { padding: '10px 16px', borderRadius: 8, border: `1px solid ${palette.border}`, minWidth: 200, fontSize: 14 },
+    btn: { padding: '10px 18px', borderRadius: 8, border: `1px solid ${palette.secondary}`, background: 'white', color: palette.secondary, fontWeight: 600, fontSize: 14, cursor: 'pointer' },
+    btnActive: { background: palette.secondary, color: 'white' },
+    input: { padding: '10px 16px', borderRadius: 8, border: `1px solid ${palette.border}`, minWidth: 200, fontSize: 14 },
+    grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 20 },
+    card: { background: 'white', borderRadius: 12, border: `1px solid ${palette.border}`, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
+    cardTitle: { fontWeight: 700, fontSize: 16, color: palette.primary, marginBottom: 4 },
+    cardText: { color: palette.gray, fontSize: 13, marginBottom: 2 },
+    badge: (activo) => ({
+      background: activo ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+      color: activo ? palette.green : palette.red,
+      padding: '4px 12px', borderRadius: 99, fontSize: 12, fontWeight: 600, display: 'inline-block'
+    }),
+    actions: { display: 'flex', gap: 8, marginTop: 12 },
+    actionBtn: { padding: '6px 14px', borderRadius: 6, fontWeight: 600, fontSize: 13, cursor: 'pointer', border: 'none' }
   };
-  const handleEliminar = id_producto => {
-    setProductos(prev => prev.filter(p => p.id_producto !== id_producto));
-  };
+
+  // Stats
+  const total = productos.length;
+  const activos = productos.filter(p => p.estado).length;
+  const sinStock = productos.filter(p => !p.stock?.cantidad || p.stock.cantidad === 0).length;
 
   return (
-    <div style={{ maxWidth: 1100, margin: "40px auto", padding: 24 }}>
-      <h2 style={{ color: palette.info, fontWeight: 800, fontSize: "2rem", marginBottom: 32 }}>
-        Todos los productos
-      </h2>
-      {/* Barra de filtros */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 28, alignItems: "center" }}>
-        <select
-          value={empresaFiltro}
-          onChange={e => setEmpresaFiltro(e.target.value)}
-          style={{ padding: "0.6em 1em", borderRadius: 8, border: "1px solid #1D7373", minWidth: 180 }}
-        >
-          <option value="">Todas las microempresas</option>
-          {mockEmpresas.map(emp => (
-            <option key={emp.id} value={emp.id}>{emp.nombre}</option>
-          ))}
-        </select>
-        <button
-          style={{
-            background: estadoFiltro === "todos" ? palette.info : palette.card,
-            color: estadoFiltro === "todos" ? "#fff" : palette.texto,
-            border: "1px solid #1D7373",
-            borderRadius: 8,
-            padding: "0.6em 1.2em",
-            fontWeight: 600,
-            cursor: "pointer"
-          }}
-          onClick={() => setEstadoFiltro("todos")}
-        >
-          Todos
-        </button>
-        <button
-          style={{
-            background: estadoFiltro === "activos" ? palette.info : palette.card,
-            color: estadoFiltro === "activos" ? "#fff" : palette.texto,
-            border: "1px solid #1D7373",
-            borderRadius: 8,
-            padding: "0.6em 1.2em",
-            fontWeight: 600,
-            cursor: "pointer"
-          }}
-          onClick={() => setEstadoFiltro("activos")}
-        >
-          Activos
-        </button>
-        <button
-          style={{
-            background: estadoFiltro === "inactivos" ? palette.info : palette.card,
-            color: estadoFiltro === "inactivos" ? "#fff" : palette.texto,
-            border: "1px solid #1D7373",
-            borderRadius: 8,
-            padding: "0.6em 1.2em",
-            fontWeight: 600,
-            cursor: "pointer"
-          }}
-          onClick={() => setEstadoFiltro("inactivos")}
-        >
-          Inactivos
-        </button>
-        <button
-          style={{
-            background: estadoFiltro === "stock0" ? palette.alerta : palette.card,
-            color: estadoFiltro === "stock0" ? "#fff" : palette.texto,
-            border: "1px solid #E57373",
-            borderRadius: 8,
-            padding: "0.6em 1.2em",
-            fontWeight: 600,
-            cursor: "pointer"
-          }}
-          onClick={() => setEstadoFiltro("stock0")}
-        >
-          Stock 0
-        </button>
-        <input
-          type="text"
-          placeholder="Buscar producto..."
-          value={nombreFiltro}
-          onChange={e => setNombreFiltro(e.target.value)}
-          style={{ padding: "0.6em 1em", borderRadius: 8, border: "1px solid #1D7373", minWidth: 200 }}
-        />
-      </div>
-      {/* Listado de productos */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 24 }}>
-        {productosFiltrados.length === 0 ? (
-          <div style={{ color: palette.alerta, fontWeight: 500, fontSize: "1.2rem", gridColumn: "1/-1" }}>
-            No hay productos que coincidan con los filtros.
-          </div>
-        ) : (
-          productosFiltrados.map(producto => (
-            <div key={producto.id_producto} style={{ background: palette.card, borderRadius: 16, boxShadow: palette.sombra, padding: 20, display: "flex", flexDirection: "column", gap: 12 }}>
-              {/* Info principal del producto */}
-              <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: "space-between" }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: "1.1rem", color: palette.info }}>{producto.nombre}</div>
-                  <div style={{ color: palette.texto, fontSize: 14 }}>{producto.descripcion}</div>
-                  <div style={{ color: "#888", fontSize: 13, marginTop: 2 }}>Microempresa: <b>{producto.microempresa}</b></div>
-                  <div style={{ color: "#888", fontSize: 13 }}>Código: {producto.codigo}</div>
-                  <div style={{ color: "#888", fontSize: 13 }}>Estado: <b style={{ color: producto.estado === "activo" ? palette.info : palette.alerta }}>{producto.estado}</b></div>
-                </div>
-                {/* Acciones de administración solo para superadmin */}
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <button onClick={() => handleEditar(producto)} style={{ background: palette.info, color: "#fff", border: "none", borderRadius: 8, padding: "0.3em 0.9em", fontWeight: 600, cursor: "pointer", fontSize: 13 }}>Editar</button>
-                  {producto.estado === "activo" ? (
-                    <button onClick={() => handleDesactivar(producto.id_producto)} style={{ background: palette.alerta, color: "#fff", border: "none", borderRadius: 8, padding: "0.3em 0.9em", fontWeight: 600, cursor: "pointer", fontSize: 13 }}>Desactivar</button>
-                  ) : (
-                    <button onClick={() => handleActivar(producto.id_producto)} style={{ background: palette.info, color: "#fff", border: "none", borderRadius: 8, padding: "0.3em 0.9em", fontWeight: 600, cursor: "pointer", fontSize: 13 }}>Activar</button>
-                  )}
-                  <button onClick={() => handleEliminar(producto.id_producto)} style={{ background: "#fff", color: palette.alerta, border: `1px solid ${palette.alerta}`, borderRadius: 8, padding: "0.3em 0.9em", fontWeight: 600, cursor: "pointer", fontSize: 13 }}>Eliminar</button>
-                </div>
-              </div>
-              {/* Info de stock destacada */}
-              <div style={{ marginTop: 8 }}>
-                <ProductStockDetail stock={producto.stock} />
-              </div>
-            </div>
-          ))
-        )}
+    <div style={s.container}>
+      <h1 style={s.title}>Todos los Productos</h1>
+      <p style={s.subtitle}>Vista global de productos de todas las microempresas</p>
+
+      {/* Stats */}
+      <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+        <div style={{ background: 'white', padding: '16px 24px', borderRadius: 10, border: `1px solid ${palette.border}`, flex: 1 }}>
+          <div style={{ fontSize: 12, color: palette.gray }}>Total Productos</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: palette.primary }}>{total}</div>
+        </div>
+        <div style={{ background: 'white', padding: '16px 24px', borderRadius: 10, border: `1px solid ${palette.border}`, flex: 1 }}>
+          <div style={{ fontSize: 12, color: palette.gray }}>Activos</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: palette.green }}>{activos}</div>
+        </div>
+        <div style={{ background: 'white', padding: '16px 24px', borderRadius: 10, border: `1px solid ${palette.border}`, flex: 1 }}>
+          <div style={{ fontSize: 12, color: palette.gray }}>Sin Stock</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: palette.red }}>{sinStock}</div>
+        </div>
       </div>
 
-      {/* Modal de edición de producto */}
+      {/* Filters */}
+      <div style={s.filters}>
+        <select value={empresaFiltro} onChange={e => setEmpresaFiltro(e.target.value)} style={s.select}>
+          <option value="">Todas las microempresas</option>
+          {microempresas.map(emp => (
+            <option key={emp.id_microempresa} value={emp.id_microempresa}>{emp.nombre}</option>
+          ))}
+        </select>
+        <button style={{ ...s.btn, ...(estadoFiltro === "todos" ? s.btnActive : {}) }} onClick={() => setEstadoFiltro("todos")}>Todos</button>
+        <button style={{ ...s.btn, ...(estadoFiltro === "activos" ? s.btnActive : {}) }} onClick={() => setEstadoFiltro("activos")}>Activos</button>
+        <button style={{ ...s.btn, ...(estadoFiltro === "inactivos" ? s.btnActive : {}) }} onClick={() => setEstadoFiltro("inactivos")}>Inactivos</button>
+        <button style={{ ...s.btn, borderColor: palette.red, color: estadoFiltro === "stock0" ? 'white' : palette.red, ...(estadoFiltro === "stock0" ? { background: palette.red } : {}) }} onClick={() => setEstadoFiltro("stock0")}>Sin Stock</button>
+        <input type="text" placeholder="Buscar producto..." value={nombreFiltro} onChange={e => setNombreFiltro(e.target.value)} style={s.input} />
+      </div>
+
+      {/* Loading/Error */}
+      {loading && <div style={{ textAlign: 'center', padding: 40, color: palette.gray }}>Cargando productos...</div>}
+      {error && <div style={{ textAlign: 'center', padding: 40, color: palette.red }}>{error}</div>}
+
+      {/* Products Grid */}
+      {!loading && !error && (
+        <div style={s.grid}>
+          {productosFiltrados.length === 0 ? (
+            <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 40, color: palette.gray }}>
+              No hay productos que coincidan con los filtros.
+            </div>
+          ) : (
+            productosFiltrados.map(producto => (
+              <div key={producto.id_producto} style={s.card}>
+                <div style={s.cardTitle}>{producto.nombre}</div>
+                <div style={s.cardText}>{producto.descripcion}</div>
+                <div style={s.cardText}>Código: <strong>{producto.codigo}</strong></div>
+                <div style={s.cardText}>Precio: <strong>${producto.precio_venta}</strong></div>
+                <div style={s.cardText}>Microempresa: <strong>{mapaEmpresas[producto.id_microempresa] || producto.id_microempresa}</strong></div>
+                <div style={{ marginTop: 8 }}>
+                  <span style={s.badge(producto.estado)}>
+                    {producto.estado ? "Activo" : "Inactivo"}
+                  </span>
+                </div>
+                {producto.stock && (
+                  <div style={{ marginTop: 12 }}>
+                    <ProductStockDetail stock={producto.stock} />
+                  </div>
+                )}
+                <div style={s.actions}>
+                  <button onClick={() => handleEditar(producto)} style={{ ...s.actionBtn, background: palette.secondary, color: 'white' }}>Editar</button>
+                  <button onClick={() => handleToggleEstado(producto)} style={{ ...s.actionBtn, background: producto.estado ? palette.red : palette.green, color: 'white' }}>
+                    {producto.estado ? "Desactivar" : "Activar"}
+                  </button>
+                  <button onClick={() => handleEliminar(producto.id_producto)} style={{ ...s.actionBtn, background: 'white', color: palette.red, border: `1px solid ${palette.red}` }}>Eliminar</button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Modal */}
       {modalEditar && (
         <ProductEditModal
           producto={modalEditar}
-          categorias={mockCategorias}
+          categorias={categorias}
           onClose={() => setModalEditar(null)}
           onSave={handleGuardarEdicion}
         />

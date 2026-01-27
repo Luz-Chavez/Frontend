@@ -4,24 +4,28 @@ import { getProveedores, createProveedor, updateProveedor, deleteProveedor } fro
 import { Truck, Pencil, Trash2, Plus, Search, X, Mail, Phone, Settings } from 'lucide-react';
 import ProveedorManager from './ProveedorManager'; // ✅ Importamos el componente nuevo
 
-export default function Proveedores() {
+export default function Proveedores({ readOnly = false }) {
   const { user } = useAuth();
   const [proveedores, setProveedores] = useState([]);
   const [filteredProveedores, setFilteredProveedores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Modales
   const [showModal, setShowModal] = useState(false);
   const [managerProveedor, setManagerProveedor] = useState(null); // Para el Manager Avanzado
-  
+
   const [editingId, setEditingId] = useState(null);
   const [newProv, setNewProv] = useState({ nombre: '', contacto: '', email: '' });
 
+  // Permisos - readOnly fuerza modo solo lectura
+  const puedeEditar = !readOnly && (user?.rol === "adminmicroempresa");
+
   // ✅ CORRECCIÓN ERROR 422: Esperar a que el usuario exista
+  // También cargar para vendedores (solo lectura)
   useEffect(() => {
     if (user?.microempresa?.id_microempresa) {
-        cargarData(user.microempresa.id_microempresa);
+      cargarData(user.microempresa.id_microempresa);
     }
   }, [user]);
 
@@ -37,7 +41,7 @@ export default function Proveedores() {
       const res = await getProveedores(idMicro);
       setProveedores(res.data);
       setFilteredProveedores(res.data);
-    } catch (err) { console.error(err); } 
+    } catch (err) { console.error(err); }
     finally { setLoading(false); }
   };
 
@@ -62,15 +66,15 @@ export default function Proveedores() {
   const handleDelete = async (id) => {
     if (!confirm("¿Eliminar proveedor?")) return;
     try {
-        await deleteProveedor(id, user.microempresa.id_microempresa);
-        cargarData(user.microempresa.id_microempresa);
+      await deleteProveedor(id, user.microempresa.id_microempresa);
+      cargarData(user.microempresa.id_microempresa);
     } catch (e) { alert("Error"); }
   };
 
   const handleEdit = (p) => {
-      setNewProv({ nombre: p.nombre, contacto: p.contacto, email: p.email });
-      setEditingId(p.id_proveedor);
-      setShowModal(true);
+    setNewProv({ nombre: p.nombre, contacto: p.contacto, email: p.email });
+    setEditingId(p.id_proveedor);
+    setShowModal(true);
   };
 
   return (
@@ -79,69 +83,75 @@ export default function Proveedores() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
         <div style={{ position: 'relative', flex: 1, maxWidth: '300px' }}>
-            <Search size={18} style={{ position: 'absolute', left: 10, top: 12, color: '#1D7373' }} />
-            <input placeholder="Buscar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ ...inputStyle, paddingLeft: 35 }} />
+          <Search size={18} style={{ position: 'absolute', left: 10, top: 12, color: '#1D7373' }} />
+          <input placeholder="Buscar..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{ ...inputStyle, paddingLeft: 35 }} />
         </div>
-        <button onClick={() => setShowModal(true)} style={primaryBtnStyle}><Plus size={18} /> Nuevo Proveedor</button>
+        {puedeEditar && (
+          <button onClick={() => setShowModal(true)} style={primaryBtnStyle}><Plus size={18} /> Nuevo Proveedor</button>
+        )}
       </div>
 
-      {loading ? <div style={{textAlign:'center'}}>Cargando...</div> : (
+      {loading ? <div style={{ textAlign: 'center' }}>Cargando...</div> : (
         <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 16 }}>
-            <thead>
-                <tr style={{ background: "#E6EAEA" }}>
-                    <th style={thStyle}>Nombre</th>
-                    <th style={thStyle}>Contacto</th>
-                    <th style={thStyle}>Email</th>
-                    <th style={thStyle}>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {filteredProveedores.map(p => (
-                <tr key={p.id_proveedor} style={{ borderBottom: "1px solid #E6EAEA" }}>
-                    <td style={tdStyle}><strong>{p.nombre}</strong></td>
-                    <td style={tdStyle}><div style={{display:'flex', gap:5}}><Phone size={14} color="#1D7373"/> {p.contacto}</div></td>
-                    <td style={tdStyle}><div style={{display:'flex', gap:5}}><Mail size={14} color="#1D7373"/> {p.email}</div></td>
-                    <td style={tdStyle}>
-                        {/* BOTÓN GESTIONAR */}
-                        <button onClick={() => setManagerProveedor(p)} title="Gestionar Productos/Pagos" style={{ ...iconBtn, border: "2px solid #1D7373", color: "#1D7373", marginRight: 8, background: "#E6F4EA" }}>
-                            <Settings size={18} />
-                        </button>
-                        <button onClick={() => handleEdit(p)} title="Editar" style={{ ...iconBtn, border: "2px solid #0A3A40", color: "#0A3A40", marginRight: 8 }}>
-                            <Pencil size={18} />
-                        </button>
-                        <button onClick={() => handleDelete(p.id_proveedor)} title="Eliminar" style={{ ...iconBtn, border: "2px solid #EF4444", color: "#EF4444" }}>
-                            <Trash2 size={18} />
-                        </button>
-                    </td>
-                </tr>
-                ))}
-            </tbody>
+          <thead>
+            <tr style={{ background: "#E6EAEA" }}>
+              <th style={thStyle}>Nombre</th>
+              <th style={thStyle}>Contacto</th>
+              <th style={thStyle}>Email</th>
+              <th style={thStyle}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProveedores.map(p => (
+              <tr key={p.id_proveedor} style={{ borderBottom: "1px solid #E6EAEA" }}>
+                <td style={tdStyle}><strong>{p.nombre}</strong></td>
+                <td style={tdStyle}><div style={{ display: 'flex', gap: 5 }}><Phone size={14} color="#1D7373" /> {p.contacto}</div></td>
+                <td style={tdStyle}><div style={{ display: 'flex', gap: 5 }}><Mail size={14} color="#1D7373" /> {p.email}</div></td>
+                <td style={tdStyle}>
+                  {/* BOTÓN GESTIONAR - solo si puede editar */}
+                  {puedeEditar && (
+                    <>
+                      <button onClick={() => setManagerProveedor(p)} title="Gestionar Productos/Pagos" style={{ ...iconBtn, border: "2px solid #1D7373", color: "#1D7373", marginRight: 8, background: "#E6F4EA" }}>
+                        <Settings size={18} />
+                      </button>
+                      <button onClick={() => handleEdit(p)} title="Editar" style={{ ...iconBtn, border: "2px solid #0A3A40", color: "#0A3A40", marginRight: 8 }}>
+                        <Pencil size={18} />
+                      </button>
+                      <button onClick={() => handleDelete(p.id_proveedor)} title="Eliminar" style={{ ...iconBtn, border: "2px solid #EF4444", color: "#EF4444" }}>
+                        <Trash2 size={18} />
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       )}
 
       {/* Modal Básico */}
       {showModal && (
         <div style={modalOverlayStyle}>
-            <div style={modalContentStyle}>
-                <button onClick={() => setShowModal(false)} style={closeModalBtn}><X size={20} /></button>
-                <h3 style={{ color: "#1D7373", marginBottom: 20, textAlign: 'center' }}>{editingId ? 'Editar' : 'Nuevo'} Proveedor</h3>
-                <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
-                    <input required placeholder="Nombre" style={inputStyle} value={newProv.nombre} onChange={e => setNewProv({...newProv, nombre: e.target.value})} />
-                    <input required placeholder="Teléfono" style={inputStyle} value={newProv.contacto} onChange={e => setNewProv({...newProv, contacto: e.target.value})} />
-                    <input required placeholder="Email" style={inputStyle} value={newProv.email} onChange={e => setNewProv({...newProv, email: e.target.value})} />
-                    <button type="submit" style={{ ...primaryBtnStyle, justifyContent: 'center' }}>Guardar</button>
-                </form>
-            </div>
+          <div style={modalContentStyle}>
+            <button onClick={() => setShowModal(false)} style={closeModalBtn}><X size={20} /></button>
+            <h3 style={{ color: "#1D7373", marginBottom: 20, textAlign: 'center' }}>{editingId ? 'Editar' : 'Nuevo'} Proveedor</h3>
+            <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
+              <input required placeholder="Nombre" style={inputStyle} value={newProv.nombre} onChange={e => setNewProv({ ...newProv, nombre: e.target.value })} />
+              <input required placeholder="Teléfono" style={inputStyle} value={newProv.contacto} onChange={e => setNewProv({ ...newProv, contacto: e.target.value })} />
+              <input required placeholder="Email" style={inputStyle} value={newProv.email} onChange={e => setNewProv({ ...newProv, email: e.target.value })} />
+              <button type="submit" style={{ ...primaryBtnStyle, justifyContent: 'center' }}>Guardar</button>
+            </form>
+          </div>
         </div>
       )}
 
       {/* Modal Avanzado */}
       {managerProveedor && (
-          <ProveedorManager 
-            proveedor={managerProveedor} 
-            idMicroempresa={user?.microempresa?.id_microempresa}
-            onClose={() => setManagerProveedor(null)}
-          />
+        <ProveedorManager
+          proveedor={managerProveedor}
+          idMicroempresa={user?.microempresa?.id_microempresa}
+          onClose={() => setManagerProveedor(null)}
+        />
       )}
     </div>
   );
