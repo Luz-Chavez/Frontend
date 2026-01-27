@@ -75,7 +75,7 @@ function ResetPassword() {
           <input
             type="text"
             value={token}
-            readOnly
+            onChange={e => setToken(e.target.value)}
             required
             autoComplete="off"
             style={{
@@ -83,10 +83,10 @@ function ResetPassword() {
               borderRadius: 8,
               border: '1.5px solid #E6EAEA',
               fontSize: 16,
-              background: '#f3f3f3',
+              background: '#fff',
               color: '#0A3A40',
               marginBottom: 2,
-              cursor: 'not-allowed',
+              cursor: 'text',
             }}
           />
           <label style={{ color: '#0A3A40', fontWeight: 700, marginBottom: 4 }}>Nueva Contraseña</label>

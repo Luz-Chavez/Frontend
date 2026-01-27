@@ -2,8 +2,11 @@
 import { useState } from "react";
 import apiClient from "../../services/apiClient";
 import { useNavigate } from "react-router-dom";
+import CaptchaRecovery from "../../components/CaptchaRecovery";
+import NotificationAlert from "../../components/NotificationAlert";
 
 function Recovery() {
+
 
 
   const [email, setEmail] = useState("");
@@ -11,6 +14,9 @@ function Recovery() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
+  const [captchaId, setCaptchaId] = useState("");
+  const [captchaInput, setCaptchaInput] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -19,7 +25,19 @@ function Recovery() {
     setError("");
     setSuccess("");
     try {
-      const res = await apiClient.post("/auth/recover", { email });
+      const form = new FormData();
+      form.append('email', email);
+      form.append('captcha_id', captchaId);
+      form.append('captcha_input', captchaInput);
+      const res = await apiClient.post("/auth/recover", form, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (res.data && res.data.ok === false && res.data.detail) {
+        setError("Error: " + res.data.detail);
+        setShowAlert(true);
+        setLoading(false);
+        return;
+      }
       let receivedToken = null;
       if (res.data) {
         if (typeof res.data === "string") {
@@ -38,8 +56,14 @@ function Recovery() {
           navigate("/auth/reset-password");
         }
       }, 1000);
-    } catch {
-      setError("No se pudo enviar el correo de recuperación.");
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.detail) {
+        setError("Error: " + err.response.data.detail);
+        setShowAlert(true);
+      } else {
+        setError("No se pudo enviar el correo de recuperación.");
+        setShowAlert(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -105,6 +129,12 @@ function Recovery() {
               outline: 'none'
             }}
           />
+          <CaptchaRecovery
+            onCaptchaChange={(id, input) => {
+              setCaptchaId(id);
+              setCaptchaInput(input);
+            }}
+          />
           <button
             type="submit"
             disabled={loading}
@@ -127,7 +157,14 @@ function Recovery() {
           </button>
         </form>
         {success && <div style={{ color: '#107361', marginTop: 14, fontWeight: 500 }}>{success}</div>}
-        {error && <div style={{ color: '#F87171', marginTop: 14, fontWeight: 500 }}>{error}</div>}
+        {/* {error && <div style={{ color: '#F87171', marginTop: 14, fontWeight: 500 }}>{error}</div>} */}
+        {showAlert && error && (
+          <NotificationAlert
+            mensaje={error}
+            tipo="alerta"
+            onClose={() => setShowAlert(false)}
+          />
+        )}
       </div>
     </div>
   );
