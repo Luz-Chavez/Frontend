@@ -125,6 +125,7 @@ const Sidebar = () => {
     superadmin: [
       // Sección Principal
       { type: 'section', title: 'Principal' },
+      { icon: Bell, text: "Notificaciones", path: "/superadmin/notificaciones" },
       { icon: LayoutDashboard, text: "Dashboard", path: "/superadmin/dashboard" },
 
       // Sección Gestión de Empresas

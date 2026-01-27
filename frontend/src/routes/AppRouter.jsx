@@ -50,6 +50,7 @@ import SuperadminRegister from "../pages/superadmin/SuperadminRegister";
 import ProductosGlobalSuperadmin from "../pages/superadmin/ProductosGlobalSuperadmin";
 import CategoriasGlobalSuperadmin from "../pages/superadmin/CategoriasGlobalSuperadmin";
 import RubrosManager from "../pages/superadmin/RubrosManager";
+import SuperNotificacionesView from "../pages/superadmin/Notificaciones";
 import GestionGlobal from "../pages/superadmin/GestionGlobal";
 
 // Páginas Onboarding (Flujo A)
@@ -175,6 +176,7 @@ function AppRouter() {
                      <Route path="/superadmin/plans" element={<PlansManager />} />
                      <Route path="/superadmin/admins" element={<Admins />} />
                      <Route path="/superadmin/rubros" element={<RubrosManager />} />
+                     <Route path="/superadmin/notificaciones" element={<SuperNotificacionesView />} />
                      <Route path="/superadmin/gestion" element={<GestionGlobal />} />
                   </Route>
                </Route>
