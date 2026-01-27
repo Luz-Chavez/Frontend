@@ -16,7 +16,7 @@ import Recovery from "../pages/auth/Recovery";
 import ResetPassword from "../pages/auth/ResetPassword";
 
 // Páginas del Dashboard Admin (Flujo B)
-import DashboardHome from "../pages/dashboard/Home";      
+import DashboardHome from "../pages/dashboard/Home";
 import Users from "../pages/dashboard/Users";
 import Subscription from "../pages/dashboard/Subscription";
 import ClientesList from "../pages/dashboard/ClientesList";
@@ -40,7 +40,7 @@ import NuevaCompra from "../pages/dashboard/NuevaCompra"; // El archivo que crea
 import Reportes from "../pages/dashboard/Reportes"; // El archivo de gráficos
 
 // Páginas SuperAdmin (Flujo D)
-import SuperDashboard from "../pages/superadmin/Dashboard"; 
+import SuperDashboard from "../pages/superadmin/Dashboard";
 import Companies from "../pages/superadmin/Companies";
 import PlansManager from "../pages/superadmin/PlansManager";
 import Admins from "../pages/superadmin/Admins";
@@ -49,9 +49,11 @@ import ClientesByMicroempresa from "../pages/superadmin/ClientesByMicroempresa";
 import SuperadminRegister from "../pages/superadmin/SuperadminRegister";
 import ProductosGlobalSuperadmin from "../pages/superadmin/ProductosGlobalSuperadmin";
 import CategoriasGlobalSuperadmin from "../pages/superadmin/CategoriasGlobalSuperadmin";
+import RubrosManager from "../pages/superadmin/RubrosManager";
+import GestionGlobal from "../pages/superadmin/GestionGlobal";
 
 // Páginas Onboarding (Flujo A)
-import OnboardingProfile from "../pages/onboarding/UserProfile"; 
+import OnboardingProfile from "../pages/onboarding/UserProfile";
 import Plans from "../pages/onboarding/Plans";
 import Payment from "../pages/onboarding/Payment";
 import CreateMicroempresaOnboarding from "../pages/onboarding/CreateMicroempresaOnboarding";
@@ -67,10 +69,10 @@ import UserPlanDetail from "../pages/user/UserPlanDetail";
 
 function AppRouter() {
    return (
-   <AuthProvider>
+      <AuthProvider>
          <BrowserRouter>
             <Routes>
-               
+
                {/* --- RUTAS PÚBLICAS (PORTAL Y AUTH) --- */}
                <Route path="/portal/:id_microempresa" element={<Portal />} />
                <Route path="/portal/:id_microempresa/checkout" element={<Checkout />} />
@@ -98,67 +100,82 @@ function AppRouter() {
                {/* 🔵 FLUJO C: Vendedor */}
                <Route element={<RoleGuard allowedRoles={['vendedor']} />}>
                   <Route element={<DashboardLayout />}>
-                      <Route path="/seller/profile" element={<SellerProfile />} />
-                      <Route path="/seller/dashboard" element={<SellerDashboard />} />
-                      <Route path="/seller/subscription" element={<SellerSubscription />} />
-                      <Route path="/seller/clientes" element={<ClientesList />} />
-                      <Route path="/seller/clientes/activos" element={<ClientesList tipo="activos" />} />
-                      <Route path="/seller/clientes/inactivos" element={<ClientesList tipo="inactivos" />} />
-                      <Route path="/seller/clientes/crear" element={<ClienteCreate />} />
-                      <Route path="/seller/clientes/editar/:id_cliente" element={<EditCliente />} />
+                     <Route path="/seller/profile" element={<SellerProfile />} />
+                     <Route path="/seller/dashboard" element={<SellerDashboard />} />
+                     <Route path="/seller/subscription" element={<SellerSubscription />} />
+
+                     {/* Clientes - Vendedor puede crear y editar */}
+                     <Route path="/seller/clientes" element={<ClientesList />} />
+                     <Route path="/seller/clientes/activos" element={<ClientesList tipo="activos" />} />
+                     <Route path="/seller/clientes/inactivos" element={<ClientesList tipo="inactivos" />} />
+                     <Route path="/seller/clientes/crear" element={<ClienteCreate />} />
+                     <Route path="/seller/clientes/editar/:id_cliente" element={<EditCliente />} />
+
+                     {/* Ventas - Vendedor puede crear ventas */}
+                     <Route path="/seller/ventas" element={<Ventas />} />
+
+                     {/* Catálogo - Solo lectura para vendedores */}
+                     <Route path="/seller/productos" element={<ProductosVista readOnly={true} />} />
+                     <Route path="/seller/categorias" element={<CategoriasVista readOnly={true} />} />
+                     <Route path="/seller/proveedores" element={<Proveedores readOnly={true} />} />
+
+                     {/* Reportes - Solo lectura */}
+                     <Route path="/seller/reportes" element={<Reportes />} />
                   </Route>
                </Route>
 
                {/* 🟢 FLUJO B: Admin CON Microempresa (AQUÍ AGREGAMOS TUS RUTAS) */}
                <Route element={<RoleGuard allowedRoles={['adminmicroempresa']} requireCompany={true} />}>
                   <Route element={<DashboardLayout />}>
-                      <Route path="/dashboard" element={<DashboardHome />} />
-                      <Route path="/dashboard/users" element={<Users />} />
-                      <Route path="/dashboard/subscription" element={<Subscription />} />
-                      <Route path="/dashboard/profile" element={<Profile />} />
-                      <Route path="/dashboard/company-edit" element={<EditMicroempresa />} />
-                      <Route path="/dashboard/admins" element={<AdminsDashboard />} />
-                      
-                      {/* Vendedores y Clientes */}
-                      <Route path="/dashboard/vendedores" element={<Vendedores />} />
-                      <Route path="/dashboard/vendedores/crear" element={<VendedorCreate />} />
-                      <Route path="/dashboard/clientes" element={<ClientesList />} />
-                      <Route path="/dashboard/clientes/activos" element={<ClientesList tipo="activos" />} />
-                      <Route path="/dashboard/clientes/inactivos" element={<ClientesList tipo="inactivos" />} />
-                      <Route path="/dashboard/clientes/crear" element={<ClienteCreate />} />
-                      <Route path="/dashboard/clientes/editar/:id_cliente" element={<EditCliente />} />
-                      
-                      {/* Productos y Categorías */}
-                      <Route path="/dashboard/productos" element={<ProductosVista />} />
-                      <Route path="/dashboard/categorias" element={<CategoriasVista />} />
-                      <Route path="/dashboard/ventas" element={<Ventas />} />
+                     <Route path="/dashboard" element={<DashboardHome />} />
+                     <Route path="/dashboard/users" element={<Users />} />
+                     <Route path="/dashboard/subscription" element={<Subscription />} />
+                     <Route path="/dashboard/profile" element={<Profile />} />
+                     <Route path="/dashboard/company-edit" element={<EditMicroempresa />} />
+                     <Route path="/dashboard/admins" element={<AdminsDashboard />} />
 
-                      {/* --- NUEVAS RUTAS DE GESTIÓN (Tus agregados) --- */}
-                      
-                      {/* 1. Proveedores */}
-                      <Route path="/dashboard/proveedores" element={<Proveedores />} />
-                      
-                      {/* 2. Compras (Historial y Registro) */}
-                      <Route path="/dashboard/compras" element={<ComprasList />} />
-                      <Route path="/dashboard/compras/nueva" element={<NuevaCompra />} />
+                     {/* Vendedores y Clientes */}
+                     <Route path="/dashboard/vendedores" element={<Vendedores />} />
+                     <Route path="/dashboard/vendedores/crear" element={<VendedorCreate />} />
+                     <Route path="/dashboard/clientes" element={<ClientesList />} />
+                     <Route path="/dashboard/clientes/activos" element={<ClientesList tipo="activos" />} />
+                     <Route path="/dashboard/clientes/inactivos" element={<ClientesList tipo="inactivos" />} />
+                     <Route path="/dashboard/clientes/crear" element={<ClienteCreate />} />
+                     <Route path="/dashboard/clientes/editar/:id_cliente" element={<EditCliente />} />
 
-                      {/* 3. Reportes */}
-                      <Route path="/dashboard/reportes" element={<Reportes />} />
-                      
+                     {/* Productos y Categorías */}
+                     <Route path="/dashboard/productos" element={<ProductosVista />} />
+                     <Route path="/dashboard/categorias" element={<CategoriasVista />} />
+                     <Route path="/dashboard/ventas" element={<Ventas />} />
+
+                     {/* --- NUEVAS RUTAS DE GESTIÓN (Tus agregados) --- */}
+
+                     {/* 1. Proveedores */}
+                     <Route path="/dashboard/proveedores" element={<Proveedores />} />
+
+                     {/* 2. Compras (Historial y Registro) */}
+                     <Route path="/dashboard/compras" element={<ComprasList />} />
+                     <Route path="/dashboard/compras/nueva" element={<NuevaCompra />} />
+
+                     {/* 3. Reportes */}
+                     <Route path="/dashboard/reportes" element={<Reportes />} />
+
                   </Route>
                </Route>
 
                {/* 🔴 FLUJO D: SuperAdmin */}
                <Route element={<RoleGuard allowedRoles={['superadmin']} />}>
                   <Route element={<DashboardLayout />}>
-                      <Route path="/superadmin/dashboard" element={<SuperDashboard />} />
-                      <Route path="/superadmin/companies" element={<Companies />} />
-                      <Route path="/superadmin/companies/:id_microempresa/clientes" element={<ClientesByMicroempresa />} />
-                      <Route path="/superadmin/clientes" element={<AllClientes />} />
-                      <Route path="/superadmin/productos" element={<ProductosGlobalSuperadmin />} />
-                      <Route path="/superadmin/categorias" element={<CategoriasGlobalSuperadmin />} />
-                      <Route path="/superadmin/plans" element={<PlansManager />} />
-                      <Route path="/superadmin/admins" element={<Admins />} />
+                     <Route path="/superadmin/dashboard" element={<SuperDashboard />} />
+                     <Route path="/superadmin/companies" element={<Companies />} />
+                     <Route path="/superadmin/companies/:id_microempresa/clientes" element={<ClientesByMicroempresa />} />
+                     <Route path="/superadmin/clientes" element={<AllClientes />} />
+                     <Route path="/superadmin/productos" element={<ProductosGlobalSuperadmin />} />
+                     <Route path="/superadmin/categorias" element={<CategoriasGlobalSuperadmin />} />
+                     <Route path="/superadmin/plans" element={<PlansManager />} />
+                     <Route path="/superadmin/admins" element={<Admins />} />
+                     <Route path="/superadmin/rubros" element={<RubrosManager />} />
+                     <Route path="/superadmin/gestion" element={<GestionGlobal />} />
                   </Route>
                </Route>
 
@@ -169,9 +186,9 @@ function AppRouter() {
                </Route>
 
             </Routes>
-      </BrowserRouter>
-   </AuthProvider>
-);
+         </BrowserRouter>
+      </AuthProvider>
+   );
 }
 
 export default AppRouter;

@@ -22,9 +22,10 @@ const mockCategorias = [
 // Vista principal de productos
 function ProductosVista({
   // categorias: propCategorias, // Eliminado porque no se usa
-  user: propUser
+  user: propUser,
+  readOnly = false // Nueva prop para modo solo lectura (vendedores)
 }) {
-  console.log("[Productos] Renderizando ProductosVista");
+  console.log("[Productos] Renderizando ProductosVista, readOnly:", readOnly);
   // Obtener usuario real del contexto
   const { user } = useAuth();
   // Si no hay usuario en contexto, usar propUser o mock
@@ -48,7 +49,8 @@ function ProductosVista({
   useEffect(() => {
     let cancel = false;
     const cargar = async () => {
-      if (usuario.rol === "adminmicroempresa" && usuario.microempresa?.id_microempresa) {
+      // También cargar para vendedores (solo lectura)
+      if ((usuario.rol === "adminmicroempresa" || usuario.rol === "vendedor") && usuario.microempresa?.id_microempresa) {
         setLoading(true);
         setError(null);
         try {
@@ -56,10 +58,8 @@ function ProductosVista({
           if (filtroRapido === "todos") {
             res = await getProductosConStock(usuario.microempresa.id_microempresa);
           } else if (filtroRapido === "activos") {
-            // USAR RUTA CORRECTA: productos activos por microempresa
             res = await getProductosActivosPorMicroempresa(usuario.microempresa.id_microempresa);
           } else if (filtroRapido === "inactivos") {
-            // USAR RUTA CORRECTA: productos inactivos por microempresa
             res = await getProductosInactivosPorMicroempresa(usuario.microempresa.id_microempresa);
           } else if (filtroRapido === "stock0") {
             res = await getProductosSinStockPorMicroempresa(usuario.microempresa.id_microempresa);
@@ -86,7 +86,8 @@ function ProductosVista({
   // Cargar categorías reales de la microempresa
   useEffect(() => {
     const fetchCategorias = async () => {
-      if (usuario.rol === "adminmicroempresa" && usuario.microempresa?.id_microempresa) {
+      // También para vendedores
+      if ((usuario.rol === "adminmicroempresa" || usuario.rol === "vendedor") && usuario.microempresa?.id_microempresa) {
         try {
           const res = await getCategoriasByMicroempresa(usuario.microempresa.id_microempresa);
           setCategorias(res.data);
@@ -110,7 +111,7 @@ function ProductosVista({
   const [crearError, setCrearError] = useState("");
   // Sincronizar productosEditados con productos cargados del backend solo cuando cambian
   useEffect(() => {
-    if (usuario.rol === "adminmicroempresa") {
+    if (usuario.rol === "adminmicroempresa" || usuario.rol === "vendedor") {
       setProductosEditados(productos);
     }
   }, [productos, usuario.rol]);
@@ -132,89 +133,89 @@ function ProductosVista({
 
   // Handlers de acciones (simulados)
 
-    // Handler para el flujo de creación de producto (paso 1, integración backend)
-    // Busca la función handleProductoCreado dentro de Productos.jsx y REEMPLÁZALA por esta:
+  // Handler para el flujo de creación de producto (paso 1, integración backend)
+  // Busca la función handleProductoCreado dentro de Productos.jsx y REEMPLÁZALA por esta:
 
-    const handleProductoCreado = async (productoForm) => {
-      if (usuario.rol !== "adminmicroempresa" || !usuario.microempresa?.id_microempresa) return;
-      
-      setCreando(true);
-      setCrearError("");
+  const handleProductoCreado = async (productoForm) => {
+    if (usuario.rol !== "adminmicroempresa" || !usuario.microempresa?.id_microempresa) return;
 
-      const {
-        nombre,
-        descripcion,
-        precio_venta,
-        costo_compra,
-        codigo,
-        estado,
-        id_categoria
-      } = productoForm;
+    setCreando(true);
+    setCrearError("");
 
-      // 1. LIMPIEZA DE DATOS:
-      // No enviamos 'id_microempresa' porque el backend lo saca del token.
-      // Convertimos números y aseguramos que no vayan valores nulos.
-      const data = {
-        nombre,
-        descripcion: descripcion || "", 
-        precio_venta: Number(precio_venta),
-        costo_compra: Number(costo_compra) || 0,
-        codigo: codigo || "",
-        estado: estado === "activo" || estado === true,
-        id_categoria: Number(id_categoria)
-      };
+    const {
+      nombre,
+      descripcion,
+      precio_venta,
+      costo_compra,
+      codigo,
+      estado,
+      id_categoria
+    } = productoForm;
 
-      // 2. GESTIÓN DE IMAGEN:
-      // Solo adjuntamos la imagen si el usuario realmente seleccionó un archivo.
-      // Si enviamos un string vacío "", el backend fallará esperando un archivo.
-      if (productoForm.imagen instanceof File) {
-        data.imagen = productoForm.imagen;
-      }
-
-      try {
-        const res = await crearProducto(data);
-        
-        // Si llegamos aquí, ¡Éxito!
-        setProductoCreado(res.data); // Esto abrirá el formulario de Stock
-        setModalCrear(false);
-        
-        // Actualizamos la lista de fondo
-        getProductosActivosConStock(usuario.microempresa.id_microempresa)
-          .then(r => setProductos(r.data));
-
-      } catch (err) {
-        console.error("Error detallado:", err);
-        
-        // 3. CAPTURA DEL ERROR REAL:
-        // Extraemos el mensaje específico que nos manda FastAPI (ej: "Field required", "Not authorized")
-        const mensajeBackend = err.response?.data?.detail;
-        
-        // Si el mensaje es un objeto (común en errores de validación), lo convertimos a texto
-        const mensajeMostrar = typeof mensajeBackend === 'object' 
-          ? JSON.stringify(mensajeBackend) 
-          : (mensajeBackend || "Error desconocido al contactar al servidor.");
-
-        setCrearError(`Error del servidor: ${mensajeMostrar}`);
-      } finally {
-        setCreando(false);
-      }
+    // 1. LIMPIEZA DE DATOS:
+    // No enviamos 'id_microempresa' porque el backend lo saca del token.
+    // Convertimos números y aseguramos que no vayan valores nulos.
+    const data = {
+      nombre,
+      descripcion: descripcion || "",
+      precio_venta: Number(precio_venta),
+      costo_compra: Number(costo_compra) || 0,
+      codigo: codigo || "",
+      estado: estado === "activo" || estado === true,
+      id_categoria: Number(id_categoria)
     };
-    
-    // Handler para el flujo de creación de stock (paso 2)
-    const handleStockCreado = stock => {
-      setProductosEditados(prev => [
-        ...prev,
-        {
-          ...productoCreado,
-          stock: {
-            ...stock,
-            id_stock: Date.now(),
-            ultima_actualizacion: new Date().toISOString().slice(0, 10)
-          }
+
+    // 2. GESTIÓN DE IMAGEN:
+    // Solo adjuntamos la imagen si el usuario realmente seleccionó un archivo.
+    // Si enviamos un string vacío "", el backend fallará esperando un archivo.
+    if (productoForm.imagen instanceof File) {
+      data.imagen = productoForm.imagen;
+    }
+
+    try {
+      const res = await crearProducto(data);
+
+      // Si llegamos aquí, ¡Éxito!
+      setProductoCreado(res.data); // Esto abrirá el formulario de Stock
+      setModalCrear(false);
+
+      // Actualizamos la lista de fondo
+      getProductosActivosConStock(usuario.microempresa.id_microempresa)
+        .then(r => setProductos(r.data));
+
+    } catch (err) {
+      console.error("Error detallado:", err);
+
+      // 3. CAPTURA DEL ERROR REAL:
+      // Extraemos el mensaje específico que nos manda FastAPI (ej: "Field required", "Not authorized")
+      const mensajeBackend = err.response?.data?.detail;
+
+      // Si el mensaje es un objeto (común en errores de validación), lo convertimos a texto
+      const mensajeMostrar = typeof mensajeBackend === 'object'
+        ? JSON.stringify(mensajeBackend)
+        : (mensajeBackend || "Error desconocido al contactar al servidor.");
+
+      setCrearError(`Error del servidor: ${mensajeMostrar}`);
+    } finally {
+      setCreando(false);
+    }
+  };
+
+  // Handler para el flujo de creación de stock (paso 2)
+  const handleStockCreado = stock => {
+    setProductosEditados(prev => [
+      ...prev,
+      {
+        ...productoCreado,
+        stock: {
+          ...stock,
+          id_stock: Date.now(),
+          ultima_actualizacion: new Date().toISOString().slice(0, 10)
         }
-      ]);
-      setProductoCreado(null);
-    };
+      }
+    ]);
+    setProductoCreado(null);
+  };
   const handleEditar = producto => setModalProducto(producto);
   // Handler para guardar edición de producto (integración backend)
   const handleGuardarEdicion = async (productoEditado) => {
@@ -293,8 +294,8 @@ function ProductosVista({
     }
   };
 
-  // Permisos
-  const puedeEditar = usuario.rol === "adminmicroempresa" ;
+  // Permisos - readOnly fuerza modo solo lectura
+  const puedeEditar = !readOnly && (usuario.rol === "adminmicroempresa");
 
   // Estilos generales
   const styles = {
@@ -413,14 +414,14 @@ function ProductosVista({
           />
         </div>
         <div style={{ display: "flex", gap: "0.5rem" }}>
-                  {usuario.rol === "adminmicroempresa" && (
-                    <button
-                      style={{ ...styles.filtroBtn, background: "#10B981", marginLeft: "auto" }}
-                      onClick={() => setModalCrear(true)}
-                    >
-                      Crear producto
-                    </button>
-                  )}
+          {puedeEditar && (
+            <button
+              style={{ ...styles.filtroBtn, background: "#10B981", marginLeft: "auto" }}
+              onClick={() => setModalCrear(true)}
+            >
+              Crear producto
+            </button>
+          )}
           <button
             style={{
               ...styles.filtroBtn,

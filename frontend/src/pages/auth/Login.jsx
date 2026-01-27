@@ -84,6 +84,8 @@ function Login() {
           <label style={{ color: '#0A3A40', fontWeight: 500, marginBottom: 4 }}>Email</label>
           <input
             type="email"
+            name="email"
+            autoComplete="email"
             placeholder="usuario@ejemplo.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -103,6 +105,8 @@ function Login() {
           <div style={{ position: 'relative', marginBottom: 12 }}>
             <input
               type={showPassword ? "text" : "password"}
+              name="password"
+              autoComplete="current-password"
               placeholder=""
               value={password}
               onChange={(e) => setPassword(e.target.value)}

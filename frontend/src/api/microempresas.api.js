@@ -3,10 +3,16 @@ import apiClient from '../services/apiClient';
 
 // Listar rubros
 export const getRubros = () => apiClient.get('/microempresas/rubros');
+export const getRubrosActivos = () => apiClient.get('/microempresas/rubros/activos');
+export const createRubro = (data) => apiClient.post('/microempresas/rubros', data);
+export const updateRubro = (id, data) => apiClient.put(`/microempresas/rubros/${id}`, data);
+export const toggleEstadoRubro = (id, activo) => apiClient.patch(`/microempresas/rubros/${id}/estado`, activo); // Backend espera bool body, cuidado con axios
+
 // Obtener suscripción por id
 export const getSuscripcionById = (id_suscripcion) => apiClient.get(`/suscripciones/${id_suscripcion}`);
 
 export const getMicroempresas = () => apiClient.get('/microempresas/');
+export const createMicroempresa = (data) => apiClient.post('/microempresas/', data);
 export const getMicroempresaById = (id) => apiClient.get(`/microempresas/${id}`);
 export const activarMicroempresa = (id) => apiClient.put(`/microempresas/${id}/activar`);
 export const desactivarMicroempresa = (id) => apiClient.put(`/microempresas/${id}/desactivar`);
