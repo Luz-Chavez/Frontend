@@ -16,7 +16,7 @@ function CreateMicroempresaOnboarding() {
     direccion: "",
     telefono: "",
     moneda: "BOB",
-    tipo_atencion: "FISICA", // Valor por defecto
+    tipo_atencion: "PRESENCIAL", // Valor por defecto
     id_rubro: "" // Debe seleccionarse
   });
 
@@ -253,7 +253,7 @@ function CreateMicroempresaOnboarding() {
               onChange={handleChange}
               style={inputStyle}
             >
-              <option value="FISICA">Atención Física</option>
+              <option value="PRESENCIAL">Atención Física</option>
               <option value="VIRTUAL">Virtual / Online</option>
               <option value="HIBRIDA">Híbrida (Ambas)</option>
             </select>
