@@ -17,6 +17,7 @@ export const getMicroempresaById = (id) => apiClient.get(`/microempresas/${id}`)
 export const activarMicroempresa = (id) => apiClient.put(`/microempresas/${id}/activar`);
 export const desactivarMicroempresa = (id) => apiClient.put(`/microempresas/${id}/desactivar`);
 export const getPlanMicroempresa = (id) => apiClient.get(`/suscripciones/microempresa/${id}/plan`);
+export const assignPlan = (data) => apiClient.post('/suscripciones/', data);
 
 export const getMicroempresasPorNombre = () => apiClient.get('/microempresas/orden/nombre');
 export const getMicroempresasPorNit = () => apiClient.get('/microempresas/orden/nit');

@@ -1,9 +1,11 @@
-import apiClient from "./axios"; // Asegúrate de que importas tu cliente axios configurado
+import apiClient from '../services/apiClient';
 
-// Obtener notificaciones de un usuario específico
-export const getNotificacionesPorUsuario = (id_usuario) =>
-    apiClient.get(`/notificaciones/usuario/${id_usuario}`);
+export const getNotificaciones = () => apiClient.get('/notificaciones/');
+export const markNotificacionLeida = (id) => apiClient.post(`/notificaciones/${id}/leida`);
+export const markAllLeida = () => apiClient.post('/notificaciones/marcar-todas-leidas'); // Check if this exists
+export const deleteNotificacion = (id) => apiClient.delete(`/notificaciones/${id}`);
+export const getNotificacionesNoLeidas = (id_usuario) => apiClient.get(`/notificaciones/usuario/${id_usuario}/no-leidas`);
 
-// Marcar notificación como leída
-export const marcarNotificacionLeida = (id_notificacion) =>
-    apiClient.post(`/notificaciones/${id_notificacion}/leida`);
+// Legacy support
+export const getNotificacionesPorUsuario = (id_usuario) => apiClient.get(`/notificaciones/usuario/${id_usuario}`);
+export const marcarNotificacionLeida = markNotificacionLeida;

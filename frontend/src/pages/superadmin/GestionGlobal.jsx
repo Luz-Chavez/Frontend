@@ -693,7 +693,7 @@ const GestionGlobal = () => {
                 <p style={s.subtitle}>Administración global del sistema</p>
             </div>
 
-            {/* Tabs */}
+            {/* Tabs - OCULTOS POR SOLICITUD DE USUARIO (Redundante con Sidebar)
             <div style={s.tabsContainer}>
                 {TABS.map((tab) => {
                     const Icon = tab.icon;
@@ -712,6 +712,7 @@ const GestionGlobal = () => {
                     );
                 })}
             </div>
+            */}
 
             {/* Stats */}
             {!loading && (
