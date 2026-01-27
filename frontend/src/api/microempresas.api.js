@@ -1,7 +1,10 @@
-// Obtener suscripción por id
-export const getSuscripcionById = (id_suscripcion) => apiClient.get(`/suscripciones/${id_suscripcion}`);
+
 import apiClient from '../services/apiClient';
 
+// Listar rubros
+export const getRubros = () => apiClient.get('/microempresas/rubros');
+// Obtener suscripción por id
+export const getSuscripcionById = (id_suscripcion) => apiClient.get(`/suscripciones/${id_suscripcion}`);
 
 export const getMicroempresas = () => apiClient.get('/microempresas/');
 export const getMicroempresaById = (id) => apiClient.get(`/microempresas/${id}`);
@@ -14,3 +17,7 @@ export const getMicroempresasPorNit = () => apiClient.get('/microempresas/orden/
 export const getMicroempresasPorPlan = (id_plan) => apiClient.get(`/microempresas/por-plan/${id_plan}`);
 export const getMicroempresasActivas = () => apiClient.get('/microempresas/activas');
 export const getMicroempresasInactivas = () => apiClient.get('/microempresas/inactivas');
+
+// Actualizar microempresa
+export const updateMicroempresa = (id_microempresa, data) =>
+	apiClient.put(`/microempresas/${id_microempresa}`, data);

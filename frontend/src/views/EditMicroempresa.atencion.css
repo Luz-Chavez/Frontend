@@ -1,0 +1,311 @@
+/* Área de subida y preview de logo */
+.logo-upload-area {
+  background: #F8FAFB;
+  border: 2px dashed #1D7373;
+  border-radius: 12px;
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 0 12px 0;
+  transition: border 0.2s;
+}
+.logo-upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+}
+.logo-upload-label:hover .logo-upload-text {
+  color: #1D7373;
+  text-decoration: underline;
+}
+.logo-preview-circle {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid #1D7373;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px 0 #0001;
+}
+.logo-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.logo-preview-placeholder {
+  color: #b2cfcf;
+  font-size: 0.98em;
+  text-align: center;
+  line-height: 1.2em;
+  font-weight: 500;
+}
+.logo-upload-text {
+  color: #0F5959;
+  font-size: 1.08em;
+  text-align: center;
+  margin-top: 2px;
+  margin-bottom: 0;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+/* Botón geocodificar dirección */
+.btn-geocodificar {
+  background: #1D7373;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: 0;
+  margin-top: 2px;
+}
+.btn-geocodificar:disabled {
+  background: #b2cfcf;
+  color: #f8f8f8;
+  cursor: not-allowed;
+}
+/* Teléfono: fila horizontal */
+.telefono-card {
+  background: #F8FAFB;
+  border-radius: 10px;
+  border: 1.5px solid #E0E7EA;
+  padding: 18px 18px 10px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 0;
+}
+.telefono-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.telefono-pais-select {
+  min-width: 220px;
+  flex-shrink: 0;
+}
+.telefono-input {
+  border: 1.5px solid #1D7373;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 1em;
+  color: #042326;
+  background: #fff;
+  outline: none;
+  transition: border 0.2s;
+  width: 100%;
+}
+.telefono-input:focus {
+  border: 1.5px solid #0F3D2E;
+}
+.telefono-preview {
+  color: #0F5959;
+  font-size: 0.98em;
+  margin-top: 2px;
+}
+.atencion-section {
+  margin-bottom: 24px;
+}
+.atencion-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.atencion-title {
+  font-weight: 600;
+  font-size: 1.13em;
+  color: #1D7373;
+}
+.atencion-card {
+  background: #F8FAFB;
+  border-radius: 10px;
+  border: 1.5px solid #E0E7EA;
+  padding: 18px 18px 10px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.atencion-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 0;
+}
+.atencion-label {
+  min-width: 130px;
+  font-weight: 500;
+  color: #0F5959;
+  font-size: 1.05em;
+}
+.atencion-radio-group {
+  display: flex;
+  gap: 18px;
+}
+.atencion-radio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #F8FAFB;
+  border: 1.5px solid #E0E7EA;
+  border-radius: 6px;
+  padding: 4px 14px 4px 10px;
+  font-size: 1em;
+  color: #1D7373;
+  cursor: pointer;
+  transition: border 0.2s, background 0.2s;
+}
+.atencion-radio.active {
+  border: 1.5px solid #1D7373;
+  background: #E6F4F1;
+  color: #1D7373;
+}
+.atencion-radio input[type="radio"] {
+  accent-color: #1D7373;
+  margin-right: 4px;
+}
+.dias-btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+/* Botón de día: color base verde y seleccionado más intenso */
+.dia-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #E6F4F1;
+  border: 1.5px solid #0F3D2E;
+  border-radius: 6px;
+  padding: 4px 12px 4px 8px;
+  font-size: 1em;
+  color: #0F3D2E;
+  cursor: pointer;
+  transition: border 0.2s, background 0.2s, color 0.2s;
+  outline: none;
+  min-width: 90px;
+  justify-content: flex-start;
+}
+.dia-btn.selected {
+  border: 1.5px solid #0F3D2E;
+  background: #1D7373;
+  color: #fff;
+}
+.dia-btn.selected .dia-btn-label {
+  color: #fff;
+  font-weight: 600;
+}
+.dia-btn .dia-btn-label {
+  color: #0F3D2E;
+  font-weight: 500;
+}
+.dia-btn-check {
+  display: flex;
+  align-items: center;
+}
+.dia-btn-label {
+  font-weight: 500;
+  font-size: 1em;
+}
+.dias-preview-bar {
+  background: #E6F4F1;
+  color: #1D7373;
+  border-radius: 6px;
+  padding: 6px 14px;
+  margin: 10px 0 0 0;
+  font-size: 1em;
+  font-weight: 500;
+  width: fit-content;
+}
+.horarios-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.horarios-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.horario-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0;
+}
+.horario-input {
+  border: 1.5px solid #E0E7EA;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 1em;
+  color: #1D7373;
+  background: #fff;
+  width: 120px;
+  outline: none;
+  transition: border 0.2s;
+}
+.horario-input:focus {
+  border: 1.5px solid #1D7373;
+}
+.horario-sep {
+  color: #1D7373;
+  font-weight: 600;
+  font-size: 1.1em;
+}
+.btn-del-horario {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
+}
+.btn-del-horario:hover {
+  background: #FDEDEC;
+  border-radius: 4px;
+}
+.btn-add-horario {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #F8FAFB;
+  border: 1.5px dashed #1D7373;
+  border-radius: 6px;
+  padding: 4px 14px;
+  color: #1D7373;
+  font-weight: 500;
+  font-size: 1em;
+  margin-top: 6px;
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+}
+.btn-add-horario:hover {
+  background: #E6F4F1;
+  border-style: solid;
+}
+.horarios-preview-bar {
+  background: #E6F4F1;
+  color: #1D7373;
+  border-radius: 6px;
+  padding: 6px 14px;
+  margin: 10px 0 0 0;
+  font-size: 1em;
+  font-weight: 500;
+  width: fit-content;
+}

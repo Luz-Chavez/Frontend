@@ -4,7 +4,7 @@ import { crearVentaOnline, registrarPagoVenta } from "../../api/ventas.api";
 import { verificarClientePorDocumento, obtenerClientePorId } from "../../api/clientes.api";
 import { useNavigate, useParams } from "react-router-dom";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import Swal from "sweetalert2";
 
 // === ICONOS SVG ===
@@ -125,7 +125,7 @@ export default function Checkout() {
         setPaso(1);
       }
     } catch (error) {
-      Swal.fire("Error", "No se pudo verificar el documento.", "error");
+      Swal.fire("Error", "No se pudo verificar el documento.", error);
     } finally {
       setVerificando(false);
     }
@@ -144,12 +144,35 @@ export default function Checkout() {
       const clientePayload = { ...clienteNuevo, id_microempresa: idEmpresaInt, fecha_creacion: new Date().toISOString() };
       setSavedTotal(totalActual);
       const res = await crearVentaOnline(ventaPayload, clientePayload);
-      setVentaCreadaId(res.data.id_venta);
-      clearCart();
-      setPaso(2);
-      Swal.fire({ icon: 'success', title: 'Pedido Registrado', text: 'Ahora realiza el pago por QR.', confirmButtonColor: '#0A3A40', timer: 2000 });
+      if (res && res.data && res.data.id_venta) {
+        setVentaCreadaId(res.data.id_venta);
+        clearCart();
+        setPaso(2);
+        Swal.fire({ icon: 'success', title: 'Pedido Registrado', text: 'Ahora realiza el pago por QR.', confirmButtonColor: '#0A3A40', timer: 2000 });
+      } else {
+        throw new Error("Respuesta inesperada del servidor.");
+      }
     } catch (error) {
-      Swal.fire("Error", "No se pudo procesar. Intenta nuevamente.", "error");
+      setPaso(1); // Mantener en el paso de registro
+      let msg = "No se pudo procesar. Intenta nuevamente.";
+      const detail = error?.response?.data?.detail;
+      if (detail) {
+        if (typeof detail === "object" && detail.mensaje) {
+          msg = detail.mensaje;
+          if (Array.isArray(detail.errores) && detail.errores.length > 0) {
+            msg += "\n\n" + detail.errores.map(e =>
+              `Producto ID: ${e.id_producto}\n${e.error}\nSolicitado: ${e.cantidad_solicitada} | Disponible: ${e.stock_disponible}`
+            ).join("\n\n");
+          }
+        } else if (Array.isArray(detail)) {
+          msg = detail.map(e => e.msg || e).join("\n");
+        } else if (typeof detail === "string") {
+          msg = detail;
+        }
+      } else if (error?.response?.data?.message) {
+        msg = error.response.data.message;
+      }
+      Swal.fire("Error", msg, "error");
     } finally {
       setLoading(false);
     }
@@ -166,10 +189,33 @@ export default function Checkout() {
       };
       setSavedTotal(totalActual);
       const res = await crearVentaOnline(ventaPayload, clienteExistente);
-      setVentaCreadaId(res.data.id_venta);
-      clearCart();
+      if (res && res.data && res.data.id_venta) {
+        setVentaCreadaId(res.data.id_venta);
+        clearCart();
+      } else {
+        throw new Error("Respuesta inesperada del servidor.");
+      }
     } catch (error) {
-      Swal.fire("Error", "No se pudo crear la venta.", "error");
+      setPaso(0); // Volver al paso de verificación
+      let msg = "No se pudo crear la venta.";
+      const detail = error?.response?.data?.detail;
+      if (detail) {
+        if (typeof detail === "object" && detail.mensaje) {
+          msg = detail.mensaje;
+          if (Array.isArray(detail.errores) && detail.errores.length > 0) {
+            msg += "\n\n" + detail.errores.map(e =>
+              `Producto ID: ${e.id_producto}\n${e.error}\nSolicitado: ${e.cantidad_solicitada} | Disponible: ${e.stock_disponible}`
+            ).join("\n\n");
+          }
+        } else if (Array.isArray(detail)) {
+          msg = detail.map(e => e.msg || e).join("\n");
+        } else if (typeof detail === "string") {
+          msg = detail;
+        }
+      } else if (error?.response?.data?.message) {
+        msg = error.response.data.message;
+      }
+      Swal.fire("Error", msg, "error");
     } finally {
       setLoading(false);
     }
@@ -182,27 +228,124 @@ export default function Checkout() {
   }, [paso, clienteExistente]);
 
   const handleConfirmarPago = async () => {
+    if (!ventaCreadaId) {
+      Swal.fire("Error", "No se encontró el ID de la venta. Intenta nuevamente.", "error");
+      return;
+    }
     setLoading(true);
     try {
-      await registrarPagoVenta(ventaCreadaId, "QR", "https://bucket-ejemplo.com/comprobante.jpg");
-      setPaso(3);
-      generarPDF();
-      Swal.fire({ icon: 'success', title: '¡Pago Enviado!', text: 'Un administrador lo validará pronto.', confirmButtonColor: '#0A3A40' });
+      const res = await registrarPagoVenta(ventaCreadaId, "QR", "https://bucket-ejemplo.com/comprobante.jpg");
+      if (res && res.data && (res.data.success || res.status === 200)) {
+        setPaso(3);
+        Swal.fire({ icon: 'success', title: '¡Pago Enviado!', text: 'Un administrador lo validará pronto.', confirmButtonColor: '#0A3A40' })
+          .then(() => {
+            generarPDF();
+          });
+      } else {
+        throw new Error("Respuesta inesperada del servidor al registrar el pago.");
+      }
     } catch (error) {
-      Swal.fire("Error", "No se pudo registrar el pago.", "error");
+      Swal.fire("Error", error?.response?.data?.message || "No se pudo registrar el pago. Intenta nuevamente.", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const generarPDF = () => {
-    const doc = new jsPDF();
-    const nombreCliente = clienteExistente?.nombre || clienteNuevo.nombre;
-    doc.setFontSize(18); doc.text("Comprobante de Pedido", 14, 20);
-    doc.setFontSize(12); doc.text(`Código: #${ventaCreadaId}`, 14, 30);
-    doc.text(`Cliente: ${nombreCliente}`, 14, 38);
-    doc.text(`Total: Bs. ${savedTotal.toFixed(2)}`, 14, 50);
-    doc.save(`pedido_${ventaCreadaId}.pdf`);
+    try {
+      if (!ventaCreadaId) throw new Error("ID de venta no definido");
+      const productosArr = (cart.length > 0 ? cart : savedCart);
+      if (!productosArr || productosArr.length === 0) throw new Error("No hay productos para mostrar en el PDF");
+      // === DATOS MICROEMPRESA ===
+      const micro = productosArr[0] || {};
+      const nombreMicro = (micro.nombre_microempresa || "Microempresa").toUpperCase();
+      const correoMicro = micro.correo_microempresa || "-";
+      const ubicacionMicro = (micro.tipo_atencion === "PRESENCIAL" || micro.tipo_atencion === "HIBRIDA") ? (micro.ubicacion_microempresa || "-") : null;
+      // === DATOS CLIENTE ===
+      const cliente = clienteExistente || clienteNuevo || {};
+      const nombreCliente = cliente.nombre || "-";
+      const docCliente = cliente.documento || "-";
+      const telCliente = cliente.telefono || "-";
+      const emailCliente = cliente.email || "-";
+      // === FECHA Y HORA ===
+      const fecha = new Date().toLocaleString('es-BO');
+      // === PDF ===
+      const doc = new jsPDF();
+      // Encabezado visual
+      doc.setFillColor(29, 115, 115);
+      doc.rect(0, 0, 210, 28, 'F');
+      doc.setFontSize(18);
+      doc.setTextColor(255);
+      doc.text(nombreMicro, 12, 17);
+      doc.setFontSize(11);
+      doc.text(`Correo: ${correoMicro}`, 12, 24);
+      if (ubicacionMicro) {
+        doc.text(`Ubicación: ${ubicacionMicro}`, 110, 24);
+      }
+      doc.setTextColor(40);
+      // Línea separadora
+      doc.setDrawColor(29, 115, 115);
+      doc.line(12, 32, 198, 32);
+      // Info venta
+      doc.setFontSize(13);
+      doc.text("Comprobante de Venta", 12, 40);
+      doc.setFontSize(10);
+      doc.text(`Fecha y hora: ${fecha}`, 12, 46);
+      doc.text(`N° Venta: #${ventaCreadaId}`, 150, 46);
+      // Datos cliente
+      doc.setFontSize(12);
+      doc.text("Datos del Cliente", 12, 54);
+      doc.setFontSize(10);
+      doc.text(`Nombre: ${nombreCliente}`, 12, 60);
+      doc.text(`Documento: ${docCliente}`, 80, 60);
+      doc.text(`Teléfono: ${telCliente}`, 12, 66);
+      doc.text(`Email: ${emailCliente}`, 80, 66);
+      // Línea separadora
+      doc.setDrawColor(220);
+      doc.line(12, 72, 198, 72);
+      // Tabla productos
+      const productos = productosArr.map(item => ([
+        item.nombre || "-",
+        item.cantidad || 0,
+        `Bs. ${parseFloat(item.precio_venta || 0).toFixed(2)}`,
+        `Bs. ${(item.cantidad * parseFloat(item.precio_venta || 0)).toFixed(2)}`
+      ]));
+      autoTable(doc, {
+        head: [["Producto", "Cantidad", "Precio U.", "Subtotal"]],
+        body: productos,
+        startY: 76,
+        theme: 'striped',
+        headStyles: { fillColor: [29, 115, 115], textColor: 255, fontStyle: 'bold', halign: 'center' },
+        styles: { fontSize: 11, cellPadding: 2 },
+        columnStyles: {
+          0: { cellWidth: 70 },
+          1: { cellWidth: 25, halign: 'center' },
+          2: { cellWidth: 35, halign: 'right' },
+          3: { cellWidth: 35, halign: 'right' }
+        }
+      });
+      // Total
+      const finalY = doc.lastAutoTable.finalY || 76 + productos.length * 10;
+      doc.setFontSize(13);
+      doc.setTextColor(29, 115, 115);
+      doc.text(`TOTAL: Bs. ${savedTotal.toFixed(2)}`, 150, finalY + 12);
+      // Footer
+      doc.setFontSize(10);
+      doc.setTextColor(120);
+      doc.text("Gracias por su compra", 12, finalY + 22);
+      doc.save(`pedido_${ventaCreadaId}.pdf`);
+    } catch (err) {
+      console.error("Error al generar PDF:", err);
+      console.log({
+        ventaCreadaId,
+        cart,
+        savedCart,
+        clienteExistente,
+        clienteNuevo,
+        savedTotal
+      });
+      Swal.fire("Error al generar PDF", err.message || "Ocurrió un error inesperado generando el comprobante.", "error");
+    }
   };
 
   const totalMostrar = cartTotal > 0 ? cartTotal : savedTotal;

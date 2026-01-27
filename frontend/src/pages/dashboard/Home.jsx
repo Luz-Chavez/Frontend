@@ -66,97 +66,162 @@ const Home = () => {
             <p style={{ color: '#1D7373', fontSize: 16, marginTop: 6 }}>Vista general de tu microempresa</p>
           </div>
           {error && <div style={{ color: 'red', marginBottom: 16 }}>{error}</div>}
-          <div style={{
-            background: '#fff',
-            borderRadius: 16,
-            border: '1.5px solid #E6EAEA',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-            padding: '32px 36px',
-            marginBottom: 32,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 18
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', fontSize: 20, color: '#0A3A40', fontWeight: 600, marginBottom: 18 }}>
-              <Building2 size={24} style={{ marginRight: 10 }} /> Información de la microempresa
-            </div>
+          <>
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '32px 60px',
-              alignItems: 'start',
-              fontSize: 16
+              background: '#fff',
+              borderRadius: 16,
+              border: '1.5px solid #E6EAEA',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              padding: '32px 36px',
+              marginBottom: 24,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 18
             }}>
-              <div>
-                <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>Nombre</div>
-                <div style={{ color: '#0A3A40', fontWeight: 700, fontSize: 26 }}>{empresa?.nombre || '-'}</div>
+              <div style={{ display: 'flex', alignItems: 'center', fontSize: 20, color: '#0A3A40', fontWeight: 600, marginBottom: 18 }}>
+                <Building2 size={24} style={{ marginRight: 10 }} /> Información de la microempresa
               </div>
-              <div>
-                <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>NIT</div>
-                <div style={{ color: '#0A3A40', fontWeight: 700, fontSize: 26 }}>{empresa?.nit || '-'}</div>
-              </div>
-              <div>
-                <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>Dirección</div>
-                <div style={{ color: '#0A3A40', fontWeight: 700, fontSize: 26 }}>{empresa?.direccion || '-'}</div>
-              </div>
-              <div>
-                <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>Teléfono</div>
-                <div style={{ color: '#0A3A40', fontWeight: 700, fontSize: 26 }}>{empresa?.telefono || '-'}</div>
-              </div>
-              <div>
-                <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  Moneda
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '32px 60px',
+                alignItems: 'start',
+                fontSize: 16
+              }}>
+                {/* Logo, nombre y croquis en la misma fila */}
+                <div style={{ gridColumn: '1 / 3', display: 'flex', alignItems: 'center', gap: 32 }}>
+                  {/* Logo y nombre */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                    {empresa?.logo && (
+                      <img
+                        src={empresa.logo.startsWith('http') ? empresa.logo : `http://localhost:8000/${empresa.logo}`}
+                        alt="Logo"
+                        style={{ width: 80, height: 80, borderRadius: 16, objectFit: 'cover', background: '#f3f3f3', border: '1px solid #e6eaea' }}
+                      />
+                    )}
+                    <div>
+                      <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>Nombre</div>
+                      <div style={{ color: '#0A3A40', fontWeight: 700, fontSize: 26 }}>{empresa?.nombre || '-'}</div>
+                    </div>
+                  </div>
+                  {/* Croquis de ubicación */}
+                  {empresa?.latitud && empresa?.longitud && (
+                    <div style={{ minWidth: 280, maxWidth: 380, marginLeft: 'auto' }}>
+                      <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 8, textAlign: 'right' }}>Croquis de ubicación</div>
+                      <div style={{ borderRadius: 12, overflow: 'hidden', border: '1.5px solid #E6EAEA', width: 320, height: 260, marginLeft: 'auto' }}>
+                        <iframe
+                          title="Mapa de ubicación"
+                          width="320"
+                          height="260"
+                          frameBorder="0"
+                          style={{ border: 0, display: 'block' }}
+                          src={`https://www.openstreetmap.org/export/embed.html?bbox=${empresa.longitud-0.001}%2C${empresa.latitud-0.001}%2C${empresa.longitud+0.001}%2C${empresa.latitud+0.001}&layer=mapnik&marker=${empresa.latitud}%2C${empresa.longitud}&zoom=18`}
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+                      <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2, textAlign: 'right' }}>
+                        Lat: {empresa.latitud} | Lng: {empresa.longitud}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div style={{ color: '#0A3A40', fontWeight: 700, fontSize: 26, display: 'flex', alignItems: 'center', gap: 14 }}>
-                  {empresa?.moneda || '-'}
-                  <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                <div>
+                  <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>NIT</div>
+                  <div style={{ color: '#0A3A40', fontWeight: 700, fontSize: 26 }}>{empresa?.nit || '-'}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>Dirección</div>
+                  <div style={{ color: '#0A3A40', fontWeight: 700, fontSize: 26 }}>{empresa?.direccion || '-'}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>Teléfono</div>
+                  <div style={{ color: '#0A3A40', fontWeight: 700, fontSize: 26 }}>{empresa?.telefono || '-'}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>Moneda</div>
+                  <div style={{ color: '#0A0A0A', fontWeight: 700, fontSize: 26, display: 'flex', alignItems: 'center', gap: 10 }}>
                     {(() => {
                       const currency = empresa?.moneda;
+                      const labelStyle = { color: '#0A0A0A', fontWeight: 700 };
                       switch (currency) {
-                        case 'USD': // Dólar estadounidense
-                          return <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="20" fill="#fff" fontWeight="bold">$</text></svg>;
-                        case 'EUR': // Euro
-                          return <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="20" fill="#fff" fontWeight="bold">€</text></svg>;
-                        case 'JPY': // Yen japonés
-                          return <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="20" fill="#fff" fontWeight="bold">¥</text></svg>;
-                        case 'GBP': // Libra esterlina
-                          return <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="20" fill="#fff" fontWeight="bold">£</text></svg>;
-                        case 'AUD': // Dólar australiano
-                          return <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="15" fill="#fff" fontWeight="bold">A$</text></svg>;
-                        case 'CAD': // Dólar canadiense
-                          return <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="15" fill="#fff" fontWeight="bold">C$</text></svg>;
-                        case 'CHF': // Franco suizo
-                          return <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="15" fill="#fff" fontWeight="bold">Fr</text></svg>;
-                        case 'CNY': // Yuan chino
-                          return <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="20" fill="#fff" fontWeight="bold">元</text></svg>;
-                        case 'HKD': // Dólar de Hong Kong
-                          return <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="15" fill="#fff" fontWeight="bold">HK$</text></svg>;
-                        case 'INR': // Rupia india
-                          return <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="20" fill="#fff" fontWeight="bold">₹</text></svg>;
-                        case 'BOB': // Boliviano
-                          return <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="15" fill="#fff" fontWeight="bold">Bs</text></svg>;
+                        case 'USD':
+                          return <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="18" fill="#fff" fontWeight="bold">$</text></svg><span style={labelStyle}>USD</span></span>;
+                        case 'EUR':
+                          return <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="18" fill="#fff" fontWeight="bold">€</text></svg><span style={labelStyle}>EUR</span></span>;
+                        case 'JPY':
+                          return <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="18" fill="#fff" fontWeight="bold">¥</text></svg><span style={labelStyle}>JPY</span></span>;
+                        case 'GBP':
+                          return <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="18" fill="#fff" fontWeight="bold">£</text></svg><span style={labelStyle}>GBP</span></span>;
+                        case 'AUD':
+                          return <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">A$</text></svg><span style={labelStyle}>AUD</span></span>;
+                        case 'CAD':
+                          return <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">C$</text></svg><span style={labelStyle}>CAD</span></span>;
+                        case 'CHF':
+                          return <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">Fr</text></svg><span style={labelStyle}>CHF</span></span>;
+                        case 'CNY':
+                          return <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="18" fill="#fff" fontWeight="bold">元</text></svg><span style={labelStyle}>CNY</span></span>;
+                        case 'HKD':
+                          return <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">HK$</text></svg><span style={labelStyle}>HKD</span></span>;
+                        case 'INR':
+                          return <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="18" fill="#fff" fontWeight="bold">₹</text></svg><span style={labelStyle}>INR</span></span>;
+                        case 'BOB':
+                          return <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><text x="12" y="18" textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">Bs</text></svg><span style={labelStyle}>BOB</span></span>;
                         default:
-                          return null;
+                          return <span style={labelStyle}>{empresa?.moneda || '-'}</span>;
                       }
                     })()}
-                  </span>
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>Activo</div>
+                  <span style={{
+                    display: 'inline-block',
+                    padding: '4px 14px',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    fontWeight: 700,
+                    background: empresa?.activo ? '#1D7373' : '#F87171',
+                    color: '#fff',
+                    marginTop: 2
+                  }}>{empresa?.activo ? 'Activo' : 'Inactivo'}</span>
+                </div>
+                <div>
+                  <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>Fecha de registro</div>
+                  <div style={{ color: '#0A3A40', fontWeight: 700, fontSize: 18 }}>{empresa?.fecha_registro ? new Date(empresa.fecha_registro).toLocaleDateString() : '-'}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>Rubro</div>
+                  <div style={{ color: '#0A3A40', fontWeight: 700, fontSize: 18 }}>{empresa?.rubro?.nombre || '-'}</div>
+                  {empresa?.rubro?.descripcion && (
+                    <div style={{ color: '#6B7280', fontSize: 13, marginTop: 2 }}>{empresa.rubro.descripcion}</div>
+                  )}
                 </div>
               </div>
-              <div>
-                <div style={{ color: '#1D7373', fontWeight: 500, marginBottom: 2 }}>Estado</div>
-                <span style={{
-                  display: 'inline-block',
-                  padding: '4px 14px',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  fontWeight: 700,
-                  background: empresa?.estado ? '#1D7373' : '#F87171',
-                  color: '#fff',
-                  marginTop: 2
-                }}>{empresa?.estado ? 'Activo' : 'Inactivo'}</span>
-              </div>
             </div>
-          </div>
+
+            {/* Sección tipo de atención */}
+            <div style={{
+              background: '#F9FAFB',
+              borderRadius: 12,
+              border: '1.5px solid #E6EAEA',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              padding: '20px 32px',
+              marginBottom: 32,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 18,
+              maxWidth: 500
+            }}>
+              <span style={{ fontSize: 18, color: '#0A3A40', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#1D7373"/><path d="M8 12h8M12 8v8" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
+                Tipo de atención:
+              </span>
+              <span style={{ fontSize: 17, color: '#0A3A40', fontWeight: 700, background: '#E0F2F1', borderRadius: 8, padding: '4px 16px' }}>
+                {empresa?.tipo_atencion || 'No especificado'}
+              </span>
+            </div>
+          </>
         </div>
       </div>
     );

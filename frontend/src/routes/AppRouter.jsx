@@ -26,7 +26,8 @@ import ProductosVista from "../pages/dashboard/Productos";
 import CategoriasVista from "../pages/dashboard/Categorias";
 import Notificaciones from "../pages/Notificaciones";
 import Profile from "../pages/dashboard/Profile";
-import CompanyEdit from "../pages/dashboard/CompanyEdit";
+// import CompanyEdit from "../pages/dashboard/CompanyEdit";
+import EditMicroempresa from "../views/EditMicroempresa";
 import AdminsDashboard from "../pages/dashboard/Admins";
 import Vendedores from "../pages/dashboard/Vendedores";
 import VendedorCreate from "../pages/dashboard/VendedorCreate";
@@ -115,7 +116,7 @@ function AppRouter() {
                       <Route path="/dashboard/users" element={<Users />} />
                       <Route path="/dashboard/subscription" element={<Subscription />} />
                       <Route path="/dashboard/profile" element={<Profile />} />
-                      <Route path="/dashboard/company-edit" element={<CompanyEdit />} />
+                      <Route path="/dashboard/company-edit" element={<EditMicroempresa />} />
                       <Route path="/dashboard/admins" element={<AdminsDashboard />} />
                       
                       {/* Vendedores y Clientes */}

@@ -162,9 +162,11 @@ export default function NuevaCompra() {
                                         {/* ESTILO DIFERENTE PARA SOLO LECTURA */}
                                         <input 
                                             type="number" 
-                                            readOnly
-                                            style={readOnlyInputStyle} 
-                                            value={currentItem.precio_unitario} 
+                                            style={inputStyle} 
+                                            value={currentItem.precio_unitario}
+                                            min={0}
+                                            step={0.01}
+                                            onChange={e => setCurrentItem({ ...currentItem, precio_unitario: parseFloat(e.target.value) })}
                                         />
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'flex-end' }}>
